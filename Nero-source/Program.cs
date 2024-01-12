@@ -3,7 +3,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
-using System.Text.Json;
 using Newtonsoft.Json;
 
 namespace Nero
@@ -11,8 +10,8 @@ namespace Nero
 
     public class Info
     {
-        public string? token { get; set; }
-        public string? guildId { get; set; }
+        public string token { get; set; }
+        public ulong basementGuildID { get; set; }
     }
 
     class Program
@@ -21,9 +20,9 @@ namespace Nero
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
-        private DiscordSocketClient? _client;
-        private CommandService? _commands;
-        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "json/safe/info.json")));
+        private DiscordSocketClient _client;
+        private CommandService _commands;
+        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/info.json")));
 
         public async Task MainAsync()
         {   
@@ -34,6 +33,7 @@ namespace Nero
             _client.Ready += Client_Ready;
 
             string token = info.token;
+
 
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
@@ -52,30 +52,27 @@ namespace Nero
 
         public async Task Client_Ready()
         {
+            // - Guild Slash Command Template
 
-            /* - Guild Slash Command Template
-
-            var guild = _client.GetGuild(info.guildID);
+            var guild = _client.GetGuild(info.basementGuildID);
 
             var guildCommand = new SlashCommandBuilder()
-                .WithName("roll")
-                .WithDescription("Rolls a dice or dices which number of sides is equal to the first parameter")
-                .AddOption("sides", ApplicationCommandOptionType.Integer, "A number of sides that the dice(s) will have", isRequired: true)
-                .AddOption("number-of-dices", ApplicationCommandOptionType.Integer, "A number of dices to roll", isRequired: false);
+                .WithName("character-create")
+                .WithDescription("Starts character creation procedure");
 
             try
             {
-                await _client.Rest.CreateGuildCommand(guildCommand.Build(), guildId);
+                await _client.Rest.CreateGuildCommand(guildCommand.Build(), info.basementGuildID);
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            */
+            
 
-
-            /* - Global Slash Command Template
+            // - Global Slash Command Template
+            /* 
 
             var globalCommand = new SlashCommandBuilder();
                 globalCommand.WithName("name");
@@ -109,6 +106,11 @@ namespace Nero
                 case "roll":
                     await RollHandler(command);
                     break;
+                case "character-create":
+                    var cl = new CharacterEditor();
+                    await cl.CharacterHandler(command, "create");
+                    break;
+                
             }
 
         }
@@ -164,6 +166,8 @@ namespace Nero
             await command.RespondAsync(embed: embedBuilder.Build());
 
         }
+
+        
 
     }
 }

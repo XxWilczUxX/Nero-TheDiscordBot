@@ -22,7 +22,7 @@ namespace Nero
 
         private DiscordSocketClient _client;
         private CommandService _commands;
-        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/info.json")));
+        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/info.json" )));
 
         public async Task MainAsync()
         {   
@@ -58,7 +58,24 @@ namespace Nero
 
             var guildCommand = new SlashCommandBuilder()
                 .WithName("character-create")
-                .WithDescription("Starts character creation procedure");
+                .WithDescription("Creates a character")
+                .AddOption("name", ApplicationCommandOptionType.String, "Name and surname of your character", isRequired: true)
+                .AddOption("nickname", ApplicationCommandOptionType.String, "The nickname of your character", isRequired: true)
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("role")
+                    .WithDescription("Choose character's role")
+                    .WithRequired(true)
+                    .AddChoice("Solo", 0)
+                    .AddChoice("Netrunner", 1)
+                    .AddChoice("Techie", 2)
+                    .AddChoice("Media", 3)
+                    .AddChoice("Nomad", 4)
+                    .AddChoice("Cop", 5)
+                    .AddChoice("Corporate", 6)
+                    .AddChoice("Medtech", 7)
+                    .AddChoice("Rockerboy / Rockergirl", 8)
+                    .WithType(ApplicationCommandOptionType.Integer)
+                );
 
             try
             {

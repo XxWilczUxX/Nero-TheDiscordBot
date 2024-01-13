@@ -57,24 +57,35 @@ namespace Nero
             var guild = _client.GetGuild(info.basementGuildID);
 
             var guildCommand = new SlashCommandBuilder()
-                .WithName("character-create")
-                .WithDescription("Creates a character")
-                .AddOption("name", ApplicationCommandOptionType.String, "Name and surname of your character", isRequired: true)
-                .AddOption("nickname", ApplicationCommandOptionType.String, "The nickname of your character", isRequired: true)
+                .WithName("character")
+                .WithDescription("character managament command tree")
                 .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("role")
-                    .WithDescription("Choose character's role")
-                    .WithRequired(true)
-                    .AddChoice("Solo", 0)
-                    .AddChoice("Netrunner", 1)
-                    .AddChoice("Techie", 2)
-                    .AddChoice("Media", 3)
-                    .AddChoice("Nomad", 4)
-                    .AddChoice("Cop", 5)
-                    .AddChoice("Corporate", 6)
-                    .AddChoice("Medtech", 7)
-                    .AddChoice("Rockerboy / Rockergirl", 8)
-                    .WithType(ApplicationCommandOptionType.Integer)
+                    .WithName("list")
+                    .WithDescription("Lists out all characters")
+                    .WithType(ApplicationCommandOptionType.SubCommand)
+                )
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("create")
+                    .WithDescription("Creates a character")
+                    .AddOption("name", ApplicationCommandOptionType.String, "Name and surname of your character", isRequired: true)
+                    .AddOption("nickname", ApplicationCommandOptionType.String, "The nickname of your character", isRequired: true)
+                    .WithType(ApplicationCommandOptionType.SubCommand)
+                    .AddOption(new SlashCommandOptionBuilder()
+                        .WithName("role")
+                        .WithDescription("Choose character's role")
+                        .WithRequired(true)
+                        .AddChoice("Solo", 0)
+                        .AddChoice("Netrunner", 1)
+                        .AddChoice("Techie", 2)
+                        .AddChoice("Media", 3)
+                        .AddChoice("Nomad", 4)
+                        .AddChoice("Cop", 5)
+                        .AddChoice("Corporate", 6)
+                        .AddChoice("Medtech", 7)
+                        .AddChoice("Rockerboy / Rockergirl", 8)
+                        .WithType(ApplicationCommandOptionType.Integer)
+                    )
+                    .AddOption("description", ApplicationCommandOptionType.String, "A short description of your character", isRequired: true)
                 );
 
             try
@@ -123,10 +134,11 @@ namespace Nero
                 case "roll":
                     await RollHandler(command);
                     break;
-                case "character-create":
+                case "character":
                     var cl = new CharacterEditor();
-                    await cl.CharacterHandler(command, "create");
+                    await cl.CharacterHandler(command, command.Data.Options.First().Name);
                     break;
+
                 
             }
 

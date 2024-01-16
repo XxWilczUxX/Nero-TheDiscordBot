@@ -10,7 +10,7 @@ namespace Nero
 
     class Character
     {
-        protected readonly string[] abilityNames = { "Combat Sense", "Interface", "Jurry Rig", "Credibility", "Family", "Authority", "Connections", "Resources", "Medical Tech", "Charismatic Leadership", "Heavy Weapons (x2)", "Long Weapons", "Short Weapons", "Archery", "Continous Fire", "Athletics", "Rubber Man", "Torture/Narcotic Tolerancy", "Stealth", "Dance", "Endurance", "Bureaucracy", "Deduction", "Language", "Composing", "Criminology", "Cryptography", "Accounting", "Science", "Animal Care", "Library Searching", "Making Deals", "Art of Survival", "Tactics", "Local Knowlege", "Education", "Riding", "Piloting (x2)", "Car Driving", "Sailing", "Lip Reading", "Concentration", "Perception", "Tracking", "Hiding/Finding an Item", "Cyber Engineering", "Electronics and Security", "Falsification", "Photography", "Pickpocketing", "Art", "Explosives", "Weapon Repair", "Land Vehicle Repair", "Water Vehicle Repair", "Air Vehicle Repair", "Lockpicking", "First Aid", "Basic Repairing", "Paramedics", "Attractiveness", "Trading", "Conversation", "Fashion", "Emotional Inteligence", "Persuasion", "Bribery", "Interrogation", "Semi-Literate Knowlege", "Fighting", "Meele Weapons", "Martial Arts", "Dodgeing", "Acting", "Playing an Instrument" };
+        Names names = new Names();
         public string name;
         public string nickname;
         public string description;
@@ -27,12 +27,12 @@ namespace Nero
             this.role = role;
             this.description = desc;
             this.stats = mainStats;
-            this.abilities[0] = new Ability(abilityNames[role]);
+            this.abilities[0] = new Ability(names.roleSuperAbilityGroups[role]);
             this.abilities[0].level = 4;
             this.health = new int[2] {/*somefuckingwierdformulaidontrememberbcidonthaveaguide T-T*/80, 80};
             this.humanity = new int[2] {this.stats[9]*10, this.stats[9]*10};
-            for(int i = 0; i < this.abilities.Length-1; i++){
-                this.abilities[i+1] = new Ability(abilityNames[i+10]);
+            for(int i = 1; i < this.abilities.Length; i++){
+                this.abilities[i] = new Ability(names.abilities[i]);
             }
         }
 
@@ -52,11 +52,8 @@ namespace Nero
     
     public class CharacterEditor
     {
-        
-        protected readonly string[] abilityClassNames = { "Long Range Weapons", "Body", "Education", "Controll", "Observation", "Technology", "Social", "Meele", "Performances" };
-        protected readonly string[] roleNames = { "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl"};
         private List<Character> characters = new List<Character>();
-
+        Names names = new Names();
         public async Task CharacterHandler(SocketSlashCommand command, string action){
             try
             {
@@ -90,7 +87,7 @@ namespace Nero
             var embed = new EmbedBuilder()
             .WithTitle("Characters:");
             for(int i = 0; i < characters.Count; i++){
-                embed.AddField($"{characters.ToArray()[i].name}: \"{characters.ToArray()[i].nickname}\"", $"Role: {roleNames[characters.ToArray()[i].role]}");
+                embed.AddField($"{characters.ToArray()[i].name}: \"{characters.ToArray()[i].nickname}\"", $"Role: {names.roles[characters.ToArray()[i].role]}");
             }
             await command.RespondAsync(embed: embed.Build());
 
@@ -123,7 +120,7 @@ namespace Nero
             Character character = new Character(data[0].Value.ToString(), data[1].Value.ToString(), Convert.ToInt32(data[2].Value), data[3].Value.ToString(), statsArr);
             characters.Add(character);
 
-            await command.RespondAsync($"Created Character {character.name}: The {roleNames[character.role]}");
+            await command.RespondAsync($"Created Character {character.name}: The {names.roles[character.role]}");
 
         }
 

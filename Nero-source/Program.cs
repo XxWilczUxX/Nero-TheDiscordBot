@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Discord.Interactions;
 
 namespace Nero
 {
@@ -14,6 +15,14 @@ namespace Nero
         public ulong basementGuildID { get; set; }
     }
 
+    public class Names
+    {
+        public readonly string[] abilityGroups = { "Long Range Weapons", "Body", "Education", "Control", "Observation", "Technology", "Social", "Meele", "Performances" };
+        public readonly string[] abilities = { "Heavy Weapons (x2)", "Long Weapons", "Short Weapons", "Archery", "Continous Fire", "Athletics", "Rubber Man", "Torture/Narcotic Tolerancy", "Stealth", "Dance", "Endurance", "Bureaucracy", "Deduction", "Language", "Composing", "Criminology", "Cryptography", "Accounting", "Science", "Animal Care", "Library Searching", "Making Deals", "Art of Survival", "Tactics", "Local Knowlege", "Education", "Riding", "Piloting (x2)", "Car Driving", "Sailing", "Lip Reading", "Concentration", "Perception", "Tracking", "Hiding/Finding an Item", "Cyber Engineering", "Electronics and Security", "Falsification", "Photography", "Pickpocketing", "Art", "Explosives", "Weapon Repair", "Land Vehicle Repair", "Water Vehicle Repair", "Air Vehicle Repair", "Lockpicking", "First Aid", "Basic Repairing", "Paramedics", "Attractiveness", "Trading", "Conversation", "Fashion", "Emotional Inteligence", "Persuasion", "Bribery", "Interrogation", "Semi-Literate Knowlege", "Fighting", "Meele Weapons", "Martial Arts", "Dodgeing", "Acting", "Playing an Instrument" };
+        public readonly string[] roles = { "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl" };
+        public readonly string[] roleSuperAbilityGroups = { "Combat Sense", "Interface", "Jurry Rig", "Credibility", "Family", "Authority", "Connections", "Resources", "Medical Tech", "Charismatic Leadership" };
+    }
+
     class Program
     {
 
@@ -22,8 +31,8 @@ namespace Nero
 
         private DiscordSocketClient _client;
         private CommandService _commands;
-        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/info.json" )));
-
+        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json" )));
+        Names names = new Names();
         public async Task MainAsync()
         {   
             _client = new DiscordSocketClient();
@@ -52,10 +61,32 @@ namespace Nero
 
         public async Task Client_Ready()
         {
-            // - Guild Slash Command Template
 
             var guild = _client.GetGuild(info.basementGuildID);
 
+            /*
+
+            var guildCommand = new SlashCommandBuilder()
+                .WithName("help")
+
+            */
+
+            // Guild commands delete all
+
+            /*
+
+            var commands = await guild.GetApplicationCommandsAsync();
+
+            foreach(var command in commands)
+            {
+                command.DeleteAsync();
+            }
+        
+            */
+
+            // character command tree
+
+            /*
             
             var guildCommand = new SlashCommandBuilder()
                 .WithName("character")
@@ -75,19 +106,10 @@ namespace Nero
                         .WithName("role")
                         .WithDescription("Choose character's role")
                         .WithRequired(true)
-                        .AddChoice("Solo", 0)
-                        .AddChoice("Netrunner", 1)
-                        .AddChoice("Techie", 2)
-                        .AddChoice("Media", 3)
-                        .AddChoice("Nomad", 4)
-                        .AddChoice("Cop", 5)
-                        .AddChoice("Corporate", 6)
-                        .AddChoice("Medtech", 7)
-                        .AddChoice("Rockerboy / Rockergirl", 8)
                         .WithType(ApplicationCommandOptionType.Integer)
                     )
                     .AddOption("description", ApplicationCommandOptionType.String, "A short description of your character", isRequired: true)
-                    .AddOption("main-stats", ApplicationCommandOptionType.String, "Stats for: INT, REF, AGI, TECH, CHA, SW, LUC, MOV, BC, EMP. ex: \"8,6,7,8,5,6,5,6,3,8\" (sum 62)")
+                    .AddOption("main-stats", ApplicationCommandOptionType.String, "Stats for: INT, REF, AGI, TECH, CHA, SW, LUC, MOV, BC, EMP. ex: \"8,6,7,8,5,6,5,6,3,8\" (sum 62)", isRequired: true)
                 )
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("edit")
@@ -96,14 +118,12 @@ namespace Nero
                     
                 );
 
+            for(int i = 0; i < names.roles.Length; i++)
+            {
+                guildCommand.Options[1].Options[2].AddChoice(names.roles[i], i);
+            }
+
             
-
-            /*
-
-            var guildCommand = new SlashCommandBuilder()
-                .WithName("help")
-
-            */
 
             try
             {
@@ -114,7 +134,7 @@ namespace Nero
                 Console.WriteLine(ex.Message);
             }
 
-            
+            */
 
             // - Global Slash Command Template
             /* 

@@ -16,16 +16,21 @@ namespace Nero
         public string description;
         public int role;
         public int[] stats;
+        public int[] health;
+        public int[] humanity;
         public Ability[] abilities;
 
-        public Character(string name, string nickname, int role, string desc){
+        public Character(string name, string nickname, int role, string desc, int[] mainStats){
             this.abilities = new Ability[66];
             this.name = name;
             this.nickname = nickname;
             this.role = role;
             this.description = desc;
-            this.stats = new int[10] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
+            this.stats = mainStats;
             this.abilities[0] = new Ability(abilityNames[role]);
+            this.abilities[0].level = 4;
+            this.health = new int[2] {/*somefuckingwierdformulaidontrememberbcidonthaveaguide T-T*/80, 80};
+            this.humanity = new int[2] {this.stats[9]*10, this.stats[9]*10};
             for(int i = 0; i < this.abilities.Length-1; i++){
                 this.abilities[i+1] = new Ability(abilityNames[i+10]);
             }
@@ -62,7 +67,7 @@ namespace Nero
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"{ex.Message}, TL;DR : characters.json doesn't exist, is empty or isn't an array of Character class.");
                 characters = new List<Character>();
             }
 
@@ -92,12 +97,33 @@ namespace Nero
         }
 
         private async Task CharacterCreate(SocketSlashCommand command){
-
+            
             var data = command.Data.Options.First().Options.ToArray();
-            Character character = new Character(data[0].Value.ToString(), data[1].Value.ToString(), Convert.ToInt32(data[2].Value), data[3].Value.ToString());
+
+            string[] statsArrString = data[4].Value.ToString().Split(",");
+            int[] statsArr = new int[10];
+            if(statsArrString.Length != 10)
+            {
+                await command.RespondAsync("Number of given stats < 10");
+            }
+            else
+            {
+                for(int i = 0; i < 10; i++)
+                {
+                    if(!int.TryParse(statsArrString[i], out statsArr[i]))
+                    {
+                        await command.RespondAsync("Stats given in wrong format or aren't a number");
+                    }
+                }
+                if(statsArr.Sum() != 62){
+                    await command.RespondAsync("Sum of stats isn't 62");
+                }
+            }
+
+            Character character = new Character(data[0].Value.ToString(), data[1].Value.ToString(), Convert.ToInt32(data[2].Value), data[3].Value.ToString(), statsArr);
             characters.Add(character);
 
-            await command.RespondAsync("Done");
+            await command.RespondAsync($"Created Character {character.name}: The {roleNames[character.role]}");
 
         }
 

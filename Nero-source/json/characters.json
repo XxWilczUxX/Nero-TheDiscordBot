@@ -1,25 +1,25 @@
 [
   {
     "name": "krzysiu",
-    "nickname": "brzeczyszczykiewicz",
-    "description": "amogus sus",
-    "role": 3,
+    "nickname": "gongon",
+    "description": "A smol guy",
+    "role": 1,
     "stats": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
+      8,
+      6,
+      7,
+      8,
+      5,
+      6,
+      5,
+      6,
+      3,
+      8
     ],
     "abilities": [
       {
-        "name": "Family",
-        "level": 0
+        "name": "Interface",
+        "level": 4
       },
       {
         "name": "Heavy Weapons (x2)",
@@ -284,26 +284,26 @@
     ]
   },
   {
-    "name": "feqi",
-    "nickname": "jfeiqf",
-    "description": "iwjgifwjfwifw",
-    "role": 4,
+    "name": "krzysiu2",
+    "nickname": "gongon2",
+    "description": "A big guy",
+    "role": 2,
     "stats": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
+      8,
+      6,
+      7,
+      8,
+      5,
+      6,
+      5,
+      6,
+      3,
+      8
     ],
     "abilities": [
       {
-        "name": "Family",
-        "level": 0
+        "name": "Jurry Rig",
+        "level": 4
       },
       {
         "name": "Heavy Weapons (x2)",

@@ -56,6 +56,7 @@ namespace Nero
 
             var guild = _client.GetGuild(info.basementGuildID);
 
+            
             var guildCommand = new SlashCommandBuilder()
                 .WithName("character")
                 .WithDescription("character managament command tree")
@@ -86,7 +87,23 @@ namespace Nero
                         .WithType(ApplicationCommandOptionType.Integer)
                     )
                     .AddOption("description", ApplicationCommandOptionType.String, "A short description of your character", isRequired: true)
+                    .AddOption("main-stats", ApplicationCommandOptionType.String, "Stats for: INT, REF, AGI, TECH, CHA, SW, LUC, MOV, BC, EMP. ex: \"8,6,7,8,5,6,5,6,3,8\" (sum 62)")
+                )
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("edit")
+                    .WithDescription("Edits a certain thing about a character")
+                    .WithType(ApplicationCommandOptionType.SubCommand)
+                    
                 );
+
+            
+
+            /*
+
+            var guildCommand = new SlashCommandBuilder()
+                .WithName("help")
+
+            */
 
             try
             {

@@ -30,8 +30,12 @@ namespace Nero
             this.abilities[0] = new Ability(names.roleSuperAbilityGroups[role]);
             this.abilities[0].level = 4;
             this.health = new int[2] {/*somefuckingwierdformulaidontrememberbcidonthaveaguide T-T*/80, 80};
-            this.humanity = new int[2] {this.stats[9]*10, this.stats[9]*10};
-            for(int i = 1; i < this.abilities.Length; i++){
+            this.humanity = new int[2];
+            if(mainStats != null){
+                this.humanity[0] = this.stats[9] * 10;
+                this.humanity[1] = this.stats[9] * 10;
+            }
+            for(int i = 1; i < this.abilities.Length-1; i++){
                 this.abilities[i] = new Ability(names.abilities[i]);
             }
         }
@@ -55,9 +59,12 @@ namespace Nero
         private List<Character> characters = new List<Character>();
         Names names = new Names();
         public async Task CharacterHandler(SocketSlashCommand command, string action){
+            
             try
             {
-                characters = JsonConvert.DeserializeObject<List<Character>>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/characters.json")));
+                Console.WriteLine(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source\\json\\characters.json"));
+                characters = JsonConvert.DeserializeObject<List<Character>>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source\\json\\characters.json")));
+                
                 if(characters.Count==0){
                     characters = new List<Character>();
                 }
@@ -116,6 +123,8 @@ namespace Nero
                     await command.RespondAsync("Sum of stats isn't 62");
                 }
             }
+
+            Console.WriteLine(statsArr[9]);
 
             Character character = new Character(data[0].Value.ToString(), data[1].Value.ToString(), Convert.ToInt32(data[2].Value), data[3].Value.ToString(), statsArr);
             characters.Add(character);

@@ -56,6 +56,17 @@ namespace Nero
     
     public class CharacterEditor
     {
+        public EmbedBuilder ErrorEmbed(string message)
+        {
+            var embed = new EmbedBuilder()
+                .WithColor(Color.Red)
+                .WithTitle("ERROR")
+                .WithDescription(message)
+                .WithCurrentTimestamp()
+            ;
+            return embed;
+        }
+
         private List<Character> characters = new List<Character>();
         Names names = new Names();
         public async Task CharacterHandler(SocketSlashCommand command, string action){
@@ -108,7 +119,7 @@ namespace Nero
             int[] statsArr = new int[10];
             if(statsArrString.Length != 10)
             {
-                await command.RespondAsync("Number of given stats < 10");
+                await command.RespondAsync(embed: ErrorEmbed("Number of given stats < 10").Build());
             }
             else
             {
@@ -116,15 +127,14 @@ namespace Nero
                 {
                     if(!int.TryParse(statsArrString[i], out statsArr[i]))
                     {
-                        await command.RespondAsync("Stats given in wrong format or aren't a number");
+                        await command.RespondAsync(embed: ErrorEmbed("Stats given in wrong format or they aren't a number").Build());
                     }
                 }
                 if(statsArr.Sum() != 62){
-                    await command.RespondAsync("Sum of stats isn't 62");
+                    await command.RespondAsync(embed: ErrorEmbed("Sum of stats isn't 62").Build());
                 }
             }
 
-            Console.WriteLine(statsArr[9]);
 
             Character character = new Character(data[0].Value.ToString(), data[1].Value.ToString(), Convert.ToInt32(data[2].Value), data[3].Value.ToString(), statsArr);
             characters.Add(character);

@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Discord.Interactions;
+using Discord.Net;
 
 namespace Nero
 {
@@ -17,6 +18,7 @@ namespace Nero
 
     public class Names
     {
+        public readonly string[] stats = { "Inteligence", "Reflex", "Agility", "Technology", "Charisma", "Will", "Luck", "Movement", "Body", "Empathy" };
         public readonly string[] abilityGroups = { "Long Range Weapons", "Body", "Education", "Control", "Observation", "Technology", "Social", "Meele", "Performances" };
         public readonly string[] abilities = { "Heavy Weapons (x2)", "Long Weapons", "Short Weapons", "Archery", "Continous Fire", "Athletics", "Rubber Man", "Torture/Narcotic Tolerancy", "Stealth", "Dance", "Endurance", "Bureaucracy", "Deduction", "Language", "Composing", "Criminology", "Cryptography", "Accounting", "Science", "Animal Care", "Library Searching", "Making Deals", "Art of Survival", "Tactics", "Local Knowlege", "Education", "Riding", "Piloting (x2)", "Car Driving", "Sailing", "Lip Reading", "Concentration", "Perception", "Tracking", "Hiding/Finding an Item", "Cyber Engineering", "Electronics and Security", "Falsification", "Photography", "Pickpocketing", "Art", "Explosives", "Weapon Repair", "Land Vehicle Repair", "Water Vehicle Repair", "Air Vehicle Repair", "Lockpicking", "First Aid", "Basic Repairing", "Paramedics", "Attractiveness", "Trading", "Conversation", "Fashion", "Emotional Inteligence", "Persuasion", "Bribery", "Interrogation", "Semi-Literate Knowlege", "Fighting", "Meele Weapons", "Martial Arts", "Dodgeing", "Acting", "Playing an Instrument" };
         public readonly string[] roles = { "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl" };
@@ -35,6 +37,7 @@ namespace Nero
         Names names = new Names();
         public async Task MainAsync()
         {   
+
             _client = new DiscordSocketClient();
             _commands = new CommandService();
 
@@ -43,11 +46,8 @@ namespace Nero
 
             string token = info.token;
 
-
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
-
-            //_client.MessageReceived += MessageReceived; 
 
             await Task.Delay(-1);
         }
@@ -64,97 +64,32 @@ namespace Nero
 
             var guild = _client.GetGuild(info.basementGuildID);
 
-            /*
-
             var guildCommand = new SlashCommandBuilder()
-                .WithName("help")
-
-            */
-
-            // Guild commands delete all
-
-            /*
-
-            var commands = await guild.GetApplicationCommandsAsync();
-
-            foreach(var command in commands)
-            {
-                command.DeleteAsync();
-            }
-        
-            */
-
-            // character command tree
-
-            /*
-            
-            var guildCommand = new SlashCommandBuilder()
-                .WithName("character")
-                .WithDescription("character managament command tree")
+                .WithName("admin")
+                .WithDescription("admin commands that are only for impactfull management of the bot")
+                .WithDefaultMemberPermissions(GuildPermission.Administrator)
                 .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("list")
-                    .WithDescription("Lists out all characters")
-                    .WithType(ApplicationCommandOptionType.SubCommand)
-                )
-                .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("create")
-                    .WithDescription("Creates a character")
-                    .AddOption("name", ApplicationCommandOptionType.String, "Name and surname of your character", isRequired: true)
-                    .AddOption("nickname", ApplicationCommandOptionType.String, "The nickname of your character", isRequired: true)
-                    .WithType(ApplicationCommandOptionType.SubCommand)
-                    .AddOption(new SlashCommandOptionBuilder()
-                        .WithName("role")
-                        .WithDescription("Choose character's role")
-                        .WithRequired(true)
-                        .WithType(ApplicationCommandOptionType.Integer)
-                    )
-                    .AddOption("description", ApplicationCommandOptionType.String, "A short description of your character", isRequired: true)
-                    .AddOption("main-stats", ApplicationCommandOptionType.String, "Stats for: INT, REF, AGI, TECH, CHA, SW, LUC, MOV, BC, EMP. ex: \"8,6,7,8,5,6,5,6,3,8\" (sum 62)", isRequired: true)
-                )
-                .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("edit")
-                    .WithDescription("Edits a certain thing about a character")
-                    .WithType(ApplicationCommandOptionType.SubCommand)
-                    
+                    .WithName("command")
+                    .WithDescription("choose a command")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.Integer)
+                    .AddChoice("Delete All Guild Commands", 0)
+                    .AddChoice("Delete All Global Commands", 1)
+                    .AddChoice("Delete All Characters", 2)  
                 );
 
-            for(int i = 0; i < names.roles.Length; i++)
+            try
             {
-                guildCommand.Options[1].Options[2].AddChoice(names.roles[i], i);
+                await guild.CreateApplicationCommandAsync(guildCommand.Build());
+            }
+            catch (ApplicationCommandException ex)
+            {
+                var json = JsonConvert.SerializeObject(ex.Errors, Formatting.Indented);
+
+                Console.WriteLine(json);
             }
 
             
-
-            try
-            {
-                await _client.Rest.CreateGuildCommand(guildCommand.Build(), info.basementGuildID);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            */
-
-            // - Global Slash Command Template
-            /* 
-
-            var globalCommand = new SlashCommandBuilder();
-                globalCommand.WithName("name");
-                globalCommand.WithDescription("desc");
-
-            try
-            {
-
-                await _client.CreateGlobalApplicationCommandAsync(globalCommand.Build());
-
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            */
 
             _client.SlashCommandExecuted += SlashCommandHandler;
 
@@ -162,78 +97,16 @@ namespace Nero
 
         private async Task SlashCommandHandler(SocketSlashCommand command)
         {
-            Console.WriteLine($"Executed: {command.Data.Name}_{command.Data.Id}");
+            Console.WriteLine($"Executed: {command.Data.Name}, ID: {command.Data.Id} \n");
 
-            
-
-            switch(command.Data.Name)
+            switch(command.CommandName)
             {
-                case "roll":
-                    await RollHandler(command);
+                case "admin":
+                    var admin = new AdminCommands();
+                    await admin.commandHandler(command, _client.GetGuild(info.basementGuildID));
                     break;
-                case "character":
-                    var cl = new CharacterEditor();
-                    await cl.CharacterHandler(command, command.Data.Options.First().Name);
-                    break;
-
-                
             }
-
         }
-
-        private async Task RollHandler(SocketSlashCommand command)
-        {
-            var commandOptions = command.Data.Options.Count;
-            var rng = new Random();
-            int[] outputs = new int[1];
-            
-            try
-            {
-                outputs = new int[Convert.ToInt32(command.Data.Options.ElementAt(1).Value)];
-            }
-            catch
-            {
-                outputs = new int[1];
-            }
-            int num = 0;   
-
-            num = rng.Next(20,50);     
-
-            // i: number of repeating all rolling, j: number of dices to roll
-
-            if(commandOptions == 1)
-            {
-                for(int i = 0; i < num; i++)
-                {
-                    outputs[0] = rng.Next(1, Convert.ToInt32(command.Data.Options.ElementAt(0).Value) + 1 );
-                }
-            } 
-            else
-            {
-                for(int i = 0; i < num; i++)
-                {
-                    for(int j = 0; j < outputs.Length; j++)
-                    {
-                        outputs[j] = rng.Next(1, Convert.ToInt32(command.Data.Options.ElementAt(0).Value) + 1 );
-                    }
-                }
-            }
-
-            
-            string title = $"**D{command.Data.Options.ElementAt(0).Value}**";
-            var output = String.Join($"\n", outputs);
-            var sum = outputs.Sum();
-
-            var embedBuilder = new EmbedBuilder()
-                .WithColor(Color.Gold)
-                .WithTitle(title)
-                .WithDescription(output);
-
-            await command.RespondAsync(embed: embedBuilder.Build());
-
-        }
-
-        
 
     }
 }

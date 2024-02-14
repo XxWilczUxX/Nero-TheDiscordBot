@@ -12,8 +12,8 @@ namespace Nero
 
     public class Info
     {
-        public string token { get; set; }
-        public ulong basementGuildID { get; set; }
+        public string Token { get; set; }
+        public ulong BasementGuildID { get; set; }
     }
 
     public class Names
@@ -34,7 +34,6 @@ namespace Nero
         private DiscordSocketClient _client;
         private CommandService _commands;
         Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json" )));
-        Names names = new Names();
         public async Task MainAsync()
         {   
 
@@ -44,9 +43,9 @@ namespace Nero
             _client.Log += Log;
             _client.Ready += Client_Ready;
 
-            string token = info.token;
+            string Token = info.Token;
 
-            await _client.LoginAsync(TokenType.Bot, token);
+            await _client.LoginAsync(TokenType.Bot, Token);
             await _client.StartAsync();
 
             await Task.Delay(-1);
@@ -62,7 +61,9 @@ namespace Nero
         public async Task Client_Ready()
         {
 
-            var guild = _client.GetGuild(info.basementGuildID);
+            var guild = _client.GetGuild(info.BasementGuildID);
+
+            
 
             var guildCommand = new SlashCommandBuilder()
                 .WithName("admin")
@@ -77,6 +78,8 @@ namespace Nero
                     .AddChoice("Delete All Global Commands", 1)
                     .AddChoice("Delete All Characters", 2)  
                 );
+
+            
 
             try
             {
@@ -102,8 +105,8 @@ namespace Nero
             switch(command.CommandName)
             {
                 case "admin":
-                    var admin = new AdminCommands();
-                    await admin.CommandHandler(command, _client.GetGuild(info.basementGuildID));
+                    var admin = new DebugCommands();
+                    await admin.CommandHandler(command, _client.GetGuild(info.BasementGuildID), _client);
                     break;
             }
         }

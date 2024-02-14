@@ -103,7 +103,7 @@ namespace Nero
             {
                 case "admin":
                     var admin = new AdminCommands();
-                    await admin.commandHandler(command, _client.GetGuild(info.basementGuildID));
+                    await admin.CommandHandler(command, _client.GetGuild(info.basementGuildID));
                     break;
             }
         }

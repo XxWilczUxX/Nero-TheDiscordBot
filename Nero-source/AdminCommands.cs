@@ -13,17 +13,17 @@ namespace Nero
     public class AdminCommands
     {
 
-        public async Task commandHandler(SocketSlashCommand command, SocketGuild guild)
+        public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild)
         {
             switch(command.Data.Options.First().Value)
             {
                 case 0:
-                    await deleteAllGuildCommands(command, guild);
+                    await DeleteAllGuildCommands(command, guild);
                     break;
             }
         }
 
-        public async Task deleteAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
+        public static async Task DeleteAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
         {
             var commands = await guild.GetApplicationCommandsAsync();
 
@@ -32,11 +32,11 @@ namespace Nero
                 if(delCom.Id != command.Id)
                 {
                     Console.WriteLine($"Deleted {delCom.Name}: {delCom.Id}");
-                    delCom.DeleteAsync();
+                    await delCom.DeleteAsync();
                 }
             }
 
-            command.RespondAsync("Done.");
+            await command.RespondAsync("Done.");
 
         }
 

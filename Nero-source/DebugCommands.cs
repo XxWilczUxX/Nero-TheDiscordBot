@@ -39,7 +39,8 @@ namespace Nero
                     await delCom.DeleteAsync();
                 }
             }
-
+            Embeds embeds = new Embeds();
+            var embed = embeds.DebugExecuted(command);
             await command.RespondAsync("Done.");
 
         }
@@ -55,8 +56,9 @@ namespace Nero
                     await delCom.DeleteAsync();
                 }
             }
-
-            await command.RespondAsync("Done.");
+            Embeds embeds = new Embeds();
+            var embed = embeds.DebugExecuted(command);
+            await command.RespondAsync();
 
         }
 

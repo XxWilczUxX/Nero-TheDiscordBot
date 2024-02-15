@@ -8,6 +8,14 @@ using Newtonsoft.Json;
 namespace Nero
 {
 
-    
+    public class Characters
+    {
+
+        public async Task CommandHandler(SocketSlashCommand command)
+        {
+            
+        }
+
+    }
 
 }

@@ -63,7 +63,7 @@ namespace Nero
 
             var guild = _client.GetGuild(info.BasementGuildID);
 
-            
+            /*
 
             var guildCommand = new SlashCommandBuilder()
                 .WithName("admin")
@@ -79,7 +79,20 @@ namespace Nero
                     .AddChoice("Delete All Characters", 2)  
                 );
 
-            
+            */
+
+            /*
+
+            var guildCommand = new SlashCommandBuilder()
+                .WithName("Character")
+                .WithDescription("All character command tree")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("task")
+                    .WithName("Choose a subcommand")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.SubCommand)
+                    )
+                );
 
             try
             {
@@ -92,7 +105,7 @@ namespace Nero
                 Console.WriteLine(json);
             }
 
-            
+            */
 
             _client.SlashCommandExecuted += SlashCommandHandler;
 

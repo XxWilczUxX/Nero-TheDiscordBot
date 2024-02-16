@@ -63,36 +63,66 @@ namespace Nero
 
             var guild = _client.GetGuild(info.BasementGuildID);
 
-            /*
+            
 
             var guildCommand = new SlashCommandBuilder()
-                .WithName("admin")
-                .WithDescription("admin commands that are only for impactfull management of the bot")
+                .WithName("debug")
+                .WithDescription("debug commands that are only for impactfull management of the bot")
                 .WithDefaultMemberPermissions(GuildPermission.Administrator)
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("command")
-                    .WithDescription("choose a command")
-                    .WithRequired(true)
-                    .WithType(ApplicationCommandOptionType.Integer)
-                    .AddChoice("Delete All Guild Commands", 0)
-                    .AddChoice("Delete All Global Commands", 1)
-                    .AddChoice("Delete All Characters", 2)  
-                );
-
-            */
-
-            /*
-
-            var guildCommand = new SlashCommandBuilder()
-                .WithName("Character")
-                .WithDescription("All character command tree")
-                .AddOption(new SlashCommandOptionBuilder()
-                    .WithName("task")
-                    .WithName("Choose a subcommand")
-                    .WithRequired(true)
-                    .WithType(ApplicationCommandOptionType.SubCommand)
+                    .WithDescription("All management that includes commands overall")
+                    .WithType(ApplicationCommandOptionType.SubCommandGroup)
+                    .AddOption(new SlashCommandOptionBuilder()
+                        .WithName("list")
+                        .WithDescription("Gives a list of all commands")
+                        .WithType(ApplicationCommandOptionType.SubCommand)
+                        .AddOption(new SlashCommandOptionBuilder()
+                            .WithName("type")
+                            .WithDescription("Choose a type")
+                            .WithRequired(true)
+                            .WithType(ApplicationCommandOptionType.Integer)
+                            .AddChoice("guild", 0)
+                            .AddChoice("global", 1)
+                        )
+                    )
+                    .AddOption(new SlashCommandOptionBuilder()
+                        .WithName("delete")
+                        .WithDescription("Deletes all commands of given type")
+                        .WithType(ApplicationCommandOptionType.SubCommand)
+                        .AddOption(new SlashCommandOptionBuilder()
+                            .WithName("type")
+                            .WithDescription("Choose a type")
+                            .WithRequired(true)
+                            .WithType(ApplicationCommandOptionType.Integer)
+                            .AddChoice("guild", 0)
+                            .AddChoice("global", 1)
+                        )
                     )
                 );
+
+           
+
+            
+
+            // var guildCommand = new SlashCommandBuilder()
+            //     .WithName("character")
+            //     .WithDescription("All character command tree")
+            //     .AddOption(new SlashCommandOptionBuilder()
+            //             .WithName("create")
+            //             .WithDescription("Starts a character creation process")
+            //             .WithType(ApplicationCommandOptionType.SubCommand)
+            //     )
+            //     .AddOption(new SlashCommandOptionBuilder()
+            //         .WithName("edit")
+            //         .WithDescription("Choose a subcommand")
+            //         .WithType(ApplicationCommandOptionType.SubCommandGroup)
+            //         .AddOption(new SlashCommandOptionBuilder()
+            //             .WithName("edit")
+            //             .WithDescription("Allows character edition")
+            //             .WithType(ApplicationCommandOptionType.SubCommand)
+            //         )
+            //     );
 
             try
             {
@@ -105,7 +135,6 @@ namespace Nero
                 Console.WriteLine(json);
             }
 
-            */
 
             _client.SlashCommandExecuted += SlashCommandHandler;
 
@@ -117,9 +146,9 @@ namespace Nero
 
             switch(command.CommandName)
             {
-                case "admin":
-                    var admin = new DebugCommands();
-                    await admin.CommandHandler(command, _client.GetGuild(info.BasementGuildID), _client);
+                case "debug":
+                    var debug = new DebugCommands();
+                    await debug.CommandHandler(command, _client.GetGuild(info.BasementGuildID), _client);
                     break;
             }
         }

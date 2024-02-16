@@ -22,7 +22,6 @@ namespace Nero
         {
             var embed = new EmbedBuilder()
                 .WithTitle("Done")
-                .WithDescription($"Executed option nr. {command.Data.Options.First().Value}")
                 .WithColor(Color.DarkBlue)
                 .WithCurrentTimestamp();
 

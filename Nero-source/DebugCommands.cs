@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Discord.Interactions;
 using Discord.Net;
+using System.Net.Sockets;
 
 namespace Nero
 {
@@ -15,16 +16,45 @@ namespace Nero
 
         public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client)
         {
-            switch(command.Data.Options.First().Value)
+            switch(command.Data.Options.First().Options.First().Name)
             {
-                case 0:
-                    await DeleteAllGuildCommands(command, guild);
+                case "list":
+                    switch(command.Data.Options.First().Options.First().Options.First().Value.ToString())
+                    {
+                        case "0":
+                            await ListAllGuildCommands(command, guild);
+                            break;
+                    }
                     break;
-                case 1:
-                    await DeleteAllGlobalCommands(command, _client);
+                case "delete":
+                    switch(command.Data.Options.First().Options.First().Options.First().Value.ToString())
+                    {
+                        case "0":
+                            await DeleteAllGuildCommands(command, guild);
+                            break;
+                        case "1":
+                            await DeleteAllGlobalCommands(command, _client);
+                            break;
+                    }
                     break;
                 
             }
+        }
+
+        public static async Task ListAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
+        {
+
+            var commands = await guild.GetApplicationCommandsAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle("List of Guild Commands")
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp();
+            foreach(var com in commands)
+            {
+                embed.AddField(com.Name, com.Id);
+            }
+            
+            await command.RespondAsync(embed: embed.Build());
         }
 
         public static async Task DeleteAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
@@ -33,15 +63,15 @@ namespace Nero
 
             foreach(var delCom in commands)
             {
-                if(delCom.Id != command.Id)
+                if(delCom.Id != command.Data.Id)
                 {
                     Console.WriteLine($"Deleted {delCom.Name}: {delCom.Id}");
                     await delCom.DeleteAsync();
                 }
             }
             Embeds embeds = new Embeds();
-            var embed = embeds.DebugExecuted(command);
-            await command.RespondAsync("Done.");
+            EmbedBuilder embed = embeds.DebugExecuted(command);
+            await command.RespondAsync(embed: embed.Build());
 
         }
 
@@ -58,7 +88,7 @@ namespace Nero
             }
             Embeds embeds = new Embeds();
             var embed = embeds.DebugExecuted(command);
-            await command.RespondAsync();
+            await command.RespondAsync(embed: embed.Build());
 
         }
 

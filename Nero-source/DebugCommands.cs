@@ -16,18 +16,21 @@ namespace Nero
 
         public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client)
         {
-            switch(command.Data.Options.First().Options.First().Name)
+            switch(command.Data.Options.First().Name)
             {
                 case "list":
-                    switch(command.Data.Options.First().Options.First().Options.First().Value.ToString())
+                    switch(command.Data.Options.First().Options.First().Value.ToString())
                     {
                         case "0":
                             await ListAllGuildCommands(command, guild);
                             break;
+                        case "1":
+                            await ListAllGlobalCommands(command, _client);
+                            break;
                     }
                     break;
                 case "delete":
-                    switch(command.Data.Options.First().Options.First().Options.First().Value.ToString())
+                    switch(command.Data.Options.First().Options.First().Value.ToString())
                     {
                         case "0":
                             await DeleteAllGuildCommands(command, guild);
@@ -37,9 +40,11 @@ namespace Nero
                             break;
                     }
                     break;
-                
+                //
             }
         }
+
+        // List commands
 
         public static async Task ListAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
         {
@@ -51,11 +56,29 @@ namespace Nero
                 .WithCurrentTimestamp();
             foreach(var com in commands)
             {
-                embed.AddField(com.Name, com.Id);
+                embed.AddField(com.Name, $"ID: {com.Id}");
             }
             
             await command.RespondAsync(embed: embed.Build());
         }
+
+        public static async Task ListAllGlobalCommands(SocketSlashCommand command, DiscordSocketClient _client)
+        {
+
+            var commands = await _client.GetGlobalApplicationCommandsAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle("List of Global Commands")
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp();
+            foreach(var com in commands)
+            {
+                embed.AddField(com.Name, $"ID: {com.Id}");
+            }
+            
+            await command.RespondAsync(embed: embed.Build());
+        }
+
+        // Delete commands
 
         public static async Task DeleteAllGuildCommands(SocketSlashCommand command, SocketGuild guild)
         {

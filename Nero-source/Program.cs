@@ -24,12 +24,12 @@ namespace Nero
     class Program
     {
 
-        static void Main(string[] args)
+        static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         private DiscordSocketClient _client;
         private CommandService _commands;
-        Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
+        readonly Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
         public async Task MainAsync()
         {   
 

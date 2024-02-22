@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Commands.Builders;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
@@ -8,7 +9,7 @@ namespace Nero
 
     public class Info
     {
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
         public ulong BasementGuildID { get; set; }
     }
 
@@ -27,9 +28,10 @@ namespace Nero
         static void Main()
             => new Program().MainAsync().GetAwaiter().GetResult();
 
-        private DiscordSocketClient _client;
-        private CommandService _commands;
-        readonly Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
+        private DiscordSocketClient _client = new DiscordSocketClient();
+        private CommandService _commands = new CommandService();
+        
+        private Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
         public async Task MainAsync()
         {   
 
@@ -58,6 +60,8 @@ namespace Nero
         {
 
             var guild = _client.GetGuild(info.BasementGuildID);
+
+            var commandBuilders = new CommandBuilders();
 
             var guildCommand = new SlashCommandBuilder();
 

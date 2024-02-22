@@ -1,11 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Discord.Interactions;
-using Discord.Net;
 
 namespace Nero
 {
@@ -89,6 +85,10 @@ namespace Nero
                 case "debug":
                     var debug = new DebugCommands();
                     await debug.CommandHandler(command, _client.GetGuild(info.BasementGuildID), _client);
+                    break;
+                case "roll":
+                    var comm = new GeneralCommands();
+                    await comm.Roll(command);
                     break;
             }
         }

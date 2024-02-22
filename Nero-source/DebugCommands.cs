@@ -1,12 +1,5 @@
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Discord.Interactions;
-using Discord.Net;
-using System.Net.Sockets;
 
 namespace Nero
 {

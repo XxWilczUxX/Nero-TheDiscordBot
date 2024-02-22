@@ -1,16 +1,9 @@
 using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Discord.Interactions;
-using Discord.Net;
 
 namespace Nero
 {
 
-    public class Commands
+    public class CommandBuilders
     {
 
         public readonly SlashCommandBuilder Debug = new SlashCommandBuilder()
@@ -83,7 +76,17 @@ namespace Nero
                     
                 )
             ;
-        
+
+            public readonly SlashCommandBuilder Roll = new SlashCommandBuilder()
+                .WithName("roll")
+                .WithDescription("Rolls a dice with given number of sides")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("sides")
+                    .WithDescription("type in number of sides")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.Integer)
+                )
+            ;
     }
 
 }

@@ -40,8 +40,15 @@ namespace Nero
 
             _client.Log += Log;
             _client.Ready += Client_Ready;
+            _client.ModalSubmitted += ModalHandler;
+            _client.ButtonExecuted += ButtonHandler;
 
             string Token = info.Token;
+
+            if(Token == string.Empty)
+            {
+                Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
+            }
 
             await _client.LoginAsync(TokenType.Bot, Token);
             await _client.StartAsync();
@@ -63,7 +70,7 @@ namespace Nero
 
             var commandBuilders = new CommandBuilders();
 
-            var guildCommand = new SlashCommandBuilder();
+            var guildCommand = commandBuilders.Character;
 
             try
             {
@@ -94,7 +101,29 @@ namespace Nero
                     var comm = new GeneralCommands();
                     await comm.Roll(command);
                     break;
+                case "character":
+                    var character = new CharacterCommands();
+                    await character.CommandHandler(command);
+                    break;
             }
+        }
+
+        private async Task ModalHandler(SocketModal modal)
+        {
+
+            switch(modal.Data.CustomId)
+            {
+                case "characterCreate_1":
+                    var comm = new Nero.CharacterCommands();
+                    await comm.CreationModalHandler(modal);
+                    break;
+            }
+
+        }
+
+        private async Task ButtonHandler(SocketMessageComponent component)
+        {
+            
         }
 
     }

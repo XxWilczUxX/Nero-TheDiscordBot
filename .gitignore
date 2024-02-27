@@ -480,3 +480,7 @@ $RECYCLE.BIN/
 # Discord Token, ID infos
 
 safe.json
+
+# Just things that doesn't have to go on github
+
+\temp

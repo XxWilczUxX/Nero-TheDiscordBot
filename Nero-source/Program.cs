@@ -42,6 +42,7 @@ namespace Nero
             _client.Ready += Client_Ready;
             _client.ModalSubmitted += ModalHandler;
             _client.ButtonExecuted += ButtonHandler;
+            _client.SelectMenuExecuted += SelectMenuHandler;
 
             string Token = info.Token;
 
@@ -124,6 +125,17 @@ namespace Nero
         private async Task ButtonHandler(SocketMessageComponent component)
         {
             
+        }
+
+        private async Task SelectMenuHandler(SocketMessageComponent component)
+        {
+            switch(component.Data.CustomId)
+            {
+                case "charCreateRole":
+                    var comm = new Nero.CharacterCommands();
+                    await comm.StatDistribution(component);
+                    break;
+            }
         }
 
     }

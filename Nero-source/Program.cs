@@ -124,7 +124,24 @@ namespace Nero
 
         private async Task ButtonHandler(SocketMessageComponent component)
         {
-            
+            string type = component.Data.CustomId.Split("_").First();
+            string action = component.Data.CustomId.Split("_").ToArray()[1];
+            switch(type)
+            {
+                case "stat":
+                    switch(action)
+                    {
+                        case "minus":
+                        case "plus":
+                        case "back":
+                        case "next":
+                            var comm = new Nero.CharacterCommands();
+                            await comm.StatDistributor(component);
+                            break;
+                        
+                    }
+                break;
+            }
         }
 
         private async Task SelectMenuHandler(SocketMessageComponent component)
@@ -133,7 +150,7 @@ namespace Nero
             {
                 case "charCreateRole":
                     var comm = new Nero.CharacterCommands();
-                    await comm.StatDistribution(component);
+                    await comm.StatDistributor(component);
                     break;
             }
         }

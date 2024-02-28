@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Discord.Rest;
 
 namespace Nero
 {
@@ -42,8 +43,66 @@ namespace Nero
             }
         }
 
+        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num)
+        {
+
+            var names = new Nero.Names();
+
+            var embed = new EmbedBuilder()
+                .WithTitle("Stat Distribution")
+                .WithDescription("Distribute stat points of your character from 2 to 8")
+                .AddField($"Current Stat: {names.stats[num]}", $"lvl: {character.stats[num]}")
+                .AddField("Available points:", character.distrPoints[0])
+            ;
+            var buttonMin = new ButtonBuilder()
+                .WithCustomId($"stat_minus_{num}")
+                .WithLabel("-")
+                .WithStyle(ButtonStyle.Danger)
+            ;
+            var buttonPlus = new ButtonBuilder()
+                .WithCustomId($"stat_plus_{num}")
+                .WithLabel("+")
+                .WithStyle(ButtonStyle.Success)
+            ;
+            var buttonBack = new ButtonBuilder()
+                .WithCustomId($"stat_back_{num}")
+                .WithLabel("Previous")
+                .WithStyle(ButtonStyle.Primary)
+            ;
+            var buttonNext = new ButtonBuilder()
+                .WithCustomId($"stat_next_{num}")
+                .WithLabel("Next")
+                .WithStyle(ButtonStyle.Primary)
+            ;
+
+            var buttonConfirm = new ButtonBuilder()
+                .WithCustomId("stat_confirm")
+                .WithLabel("Confirm")
+                .WithStyle(ButtonStyle.Secondary)
+            ;
+
+            var builder = new ComponentBuilder()
+                .WithButton(buttonMin)
+                .WithButton(buttonBack)
+                .WithButton(buttonNext)
+                .WithButton(buttonPlus)
+                .WithButton(buttonConfirm, 1)
+            ;
+
+            File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
+
+            await component.UpdateAsync(x=>
+                {
+                    x.Embed = embed.Build();
+                    x.Components = builder.Build();
+                }
+            );
+
+        }
+
         async Task Create(SocketSlashCommand command)
         {
+            
             var name = new TextInputBuilder()
                 .WithCustomId("name")
                 .WithLabel("Name")
@@ -81,7 +140,6 @@ namespace Nero
 
             Character character = new Character(name, descr);
 
-            Directory.CreateDirectory(Path.Join(Directory.GetCurrentDirectory(), "\\Nero-source\\temp\\characters"));
             File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
             
             var role = new SelectMenuBuilder()
@@ -109,9 +167,10 @@ namespace Nero
 
         }
 
-        public async Task StatDistribution(SocketMessageComponent component)
+        public async Task StatDistributor(SocketMessageComponent component)
         {
             Character? character = JsonConvert.DeserializeObject<Character>( File.ReadAllText(Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json")) );
+            
             if(character == null)
             {   
                 var embeds = new Nero.Embeds();
@@ -119,51 +178,68 @@ namespace Nero
             }
             else
             {
-                var names = new Nero.Names();
+                if(component.Data.CustomId == "charCreateRole")
+                {
+                    character.role = component.Data.Values.First();
 
-                character.role = component.Data.Values.First();
-
-                var embed = new EmbedBuilder()
-                    .WithTitle("Stat Distribution")
-                    .WithDescription("Distribute stat points of your character from 2 to 8")
-                    .AddField($"Current Stat: {names.stats[0]}", $"lvl: {character.stats[0]}")
-                    .AddField("Available points:", character.distrPoints[0])
-                ;
-
-                var buttonMin = new ButtonBuilder()
-                    .WithCustomId("minus_0")
-                    .WithLabel("-")
-                    .WithStyle(ButtonStyle.Danger)
-                ;
-                var buttonPlus = new ButtonBuilder()
-                    .WithCustomId("plus_0")
-                    .WithLabel("+")
-                    .WithStyle(ButtonStyle.Success)
-                ;
-                var buttonBack = new ButtonBuilder()
-                    .WithCustomId("back_0")
-                    .WithLabel("Previous")
-                    .WithStyle(ButtonStyle.Primary)
-                ;
-                var buttonNext = new ButtonBuilder()
-                    .WithCustomId("next_0")
-                    .WithLabel("Next")
-                    .WithStyle(ButtonStyle.Primary)
-                ;
-
-                var builder = new ComponentBuilder()
-                    .WithButton(buttonMin)
-                    .WithButton(buttonBack)
-                    .WithButton(buttonNext)
-                    .WithButton(buttonPlus)
-                ;
-
-                await component.UpdateAsync(x =>
+                    await messageStatDistributor(character, component, 0);
+                
+                }
+                else
+                {
+                    string action = component.Data.CustomId.Split("_").ToArray()[1];
+                    int num = 0;
+                    int.TryParse(component.Data.CustomId.Split("_").Last(), out num);
+                    switch(action)
                     {
-                        x.Embed = embed.Build();
-                        x.Components = builder.Build();
+
+                        case "minus":
+                            if(character.stats[num] == 2){
+                                await messageStatDistributor(character, component, num);
+                            }
+                            else
+                            {
+                                character.stats[num] -= 1;
+                                character.distrPoints[0] += 1;
+                                await messageStatDistributor(character, component, num);
+                            }
+                            break;
+                        
+                        case "plus":
+                            if(character.stats[num] == 8 || character.distrPoints[0] == 0){
+                                await messageStatDistributor(character, component, num);
+                            }
+                            else
+                            {
+                                character.stats[num] += 1;
+                                character.distrPoints[0] -= 1;
+                                await messageStatDistributor(character, component, num);
+                            }
+                            break;
+                        
+                        case "back":
+                            if(num == 0){
+                                await messageStatDistributor(character, component, 8);
+                            }
+                            else
+                            {
+                                await messageStatDistributor(character, component, num-1);
+                            }
+                            break;
+                        
+                        case "next":
+                            if(num == 8){
+                                await messageStatDistributor(character, component, 0);
+                            }
+                            else
+                            {
+                                await messageStatDistributor(character, component, num+1);
+                            }
+                            break;
+
                     }
-                );
+
+                }
             }
         }
 

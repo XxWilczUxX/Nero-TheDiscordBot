@@ -14,10 +14,10 @@ namespace Nero
         public string name;
         public string description;
         public string role;
-        public int[] stats = new int[10];
-        public int[,] skills = new int[66,2];
-        public int[] distrPoints = new int[] {42, 58};
-
+        public int[] stats {get; set;} = new int[10];
+        public Skill[] skills {get; set;} = new Skill[66];
+        public int[] distrPoints {get;} = new int[] {42, 58};
+        
         public Character(string name, string description)
         {
             this.name = name;
@@ -25,6 +25,61 @@ namespace Nero
             for(int i = 0; i < 10; i++)
             {
                 this.stats[i] = 2;
+            }
+
+
+        }
+
+        public void PointsAllocation(int stat, int num)
+        {
+            
+            
+
+        }
+
+    }
+
+    public class Skill
+    {
+        public int level {get; set;} = 0;
+        private int stat {get;} = 0;
+        public int? cost {get;} = 1;
+        public string? name {get;}
+        public List<Skill>? subSkills {get; set;}
+
+        public Skill(int stat, int cost)
+        {
+            this.stat = stat;
+            this.cost = cost;
+        }
+
+        public Skill(int stat, string name)
+        {
+            this.name = name;
+            this.stat = stat;
+        }
+
+        public void AddLevel(int num)
+        {
+            if(this.level + num < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            else
+            {
+                this.level += num;
+            }
+        }
+
+        public void AddSubskill(Skill subskill)
+        {
+            if(this.subSkills == null)
+            {
+                this.subSkills = new List<Skill>();
+            }
+            else
+            {
+                this.subSkills.Add(subskill);
             }
         }
 
@@ -187,58 +242,7 @@ namespace Nero
                 }
                 else
                 {
-                    string action = component.Data.CustomId.Split("_").ToArray()[1];
-                    int num = 0;
-                    int.TryParse(component.Data.CustomId.Split("_").Last(), out num);
-                    switch(action)
-                    {
-
-                        case "minus":
-                            if(character.stats[num] == 2){
-                                await messageStatDistributor(character, component, num);
-                            }
-                            else
-                            {
-                                character.stats[num] -= 1;
-                                character.distrPoints[0] += 1;
-                                await messageStatDistributor(character, component, num);
-                            }
-                            break;
-                        
-                        case "plus":
-                            if(character.stats[num] == 8 || character.distrPoints[0] == 0){
-                                await messageStatDistributor(character, component, num);
-                            }
-                            else
-                            {
-                                character.stats[num] += 1;
-                                character.distrPoints[0] -= 1;
-                                await messageStatDistributor(character, component, num);
-                            }
-                            break;
-                        
-                        case "back":
-                            if(num == 0){
-                                await messageStatDistributor(character, component, 8);
-                            }
-                            else
-                            {
-                                await messageStatDistributor(character, component, num-1);
-                            }
-                            break;
-                        
-                        case "next":
-                            if(num == 8){
-                                await messageStatDistributor(character, component, 0);
-                            }
-                            else
-                            {
-                                await messageStatDistributor(character, component, num+1);
-                            }
-                            break;
-
-                    }
-
+                    
                 }
             }
         }

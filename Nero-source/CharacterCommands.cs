@@ -73,21 +73,21 @@ namespace Nero
                     cost = 2;
                 }
 
-                if(i == 13 || i == 19 || i == 24 || i == 64)
+                if(i == 13 || i == 19 || i == 24 || i == 64) // Subskill skills
                 {
                     hasLevel = false;
                 }
 
-                if(i == 5 || i == 8 || i == 13 || i == 8 || i == 19 || i == 24 || i == 25 || i == 31 || i == 32 || i == 47 || i == 52 || i == 54 || i == 55 || i == 59 || i == 62)
+                if(i == 5 || i == 8 || i == 13 || i == 8 || i == 19 || i == 24 || i == 25 || i == 31 || i == 32 || i == 47 || i == 52 || i == 54 || i == 55 || i == 59 || i == 62) // Primary level allocation or creation of primary subskill
                 {
                     if(!hasLevel)
                     {
                         switch(i)
                         {
-                            case 13:
+                            case 13: // Language
                                 subskill = new Skill(names.subskills[0], 2);
                                 break;
-                            case 24:
+                            case 24: // Local Knowlege
                                 subskill = new Skill(names.subskills[1], 2);
                                 break;
                         }
@@ -125,7 +125,7 @@ namespace Nero
         public int? Cost {get;}
         public List<Skill>? SubSkills {get; set;}
 
-        public Skill(string name, int stat, int cost, bool hasLevel, int level = 0)
+        public Skill(string name, int stat, int cost, bool hasLevel, int level = 0) // Primary Skill
         {
             this.Name = name;
             this.Stat = stat;
@@ -136,7 +136,7 @@ namespace Nero
             }
         }
 
-        public Skill(string name, int level)
+        public Skill(string name, int level) // Subskill
         {
             this.Name = name;
             this.Level = level;

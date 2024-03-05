@@ -11,22 +11,65 @@ namespace Nero
 
     public class Character
     {
-        public string name;
-        public string description;
-        public string role;
-        public int[] stats {get; set;} = new int[10];
-        public Skill[] skills {get; set;} = new Skill[66];
-        public int[] distrPoints {get;} = new int[] {42, 58};
+        public string Name;
+        public string Description;
+        public string Role {get; set;}
+        public int[] Stats {get; set;} = new int[10];
+        public Skill[] Skills {get; set;} = new Skill[65];
+        public int[] DistrPoints {get;} = new int[] {42, 58};
         
         public Character(string name, string description)
         {
-            this.name = name;
-            this.description = description;
-            for(int i = 0; i < 10; i++)
+            Names names = new Names();
+            this.Name = name;
+            this.Description = description;
+            for(int i = 0; i < Stats.Length; i++)
             {
-                this.stats[i] = 2;
+                this.Stats[i] = 2;
             }
+            
+            int stat;
+            int cost;
 
+            for(int i = 0; i < Skills.Length; i++)
+            {
+                cost = 1;
+                if(i == 7 || i == 9 || i == 10 || i == 31) // SW
+                {
+                    stat = 5;
+                }
+                else if(i == 52 || i == 54) // EMP
+                {
+                    stat = 4;
+                }
+                else if(i < 5 || (25 < i && i < 30)) // REF
+                {
+                    stat = 1;
+                }
+                else if((4 < i && i < 9) || (58 < i && i < 63)) // ZW
+                {
+                    stat = 2;
+                }
+                else if(i > 10 && i < 35) // INT
+                {
+                    stat = 0;
+                }
+                else if((34 < i && i < 50) || i == 65) // TECH
+                {
+                    stat = 3;
+                }
+                else // CHA
+                {
+                    stat = 9;
+                }
+                if(i == 0 || i == 4 || i == 27 || i == 36 || i == 41 || i == 49 || i == 61) // Cost
+                {
+                    cost = 2;
+                }
+
+                this.Skills[i] = new Skill(names.skills[i], stat, cost, true);
+
+            }
 
         }
 
@@ -41,45 +84,32 @@ namespace Nero
 
     public class Skill
     {
-        public int level {get; set;} = 0;
-        private int stat {get;} = 0;
-        public int? cost {get;} = 1;
-        public string? name {get;}
-        public List<Skill>? subSkills {get; set;}
+        public string Name {get;}
+        public int? Level {get; set;}
+        public int Stat {get;}
+        public int? Cost {get;}
+        public List<Skill>? SubSkills {get; set;}
 
-        public Skill(int stat, int cost)
+        public Skill(string name, int stat, int cost, bool hasLevel = false, int level = 0)
         {
-            this.stat = stat;
-            this.cost = cost;
-        }
-
-        public Skill(int stat, string name)
-        {
-            this.name = name;
-            this.stat = stat;
-        }
-
-        public void AddLevel(int num)
-        {
-            if(this.level + num < 0)
+            this.Name = name;
+            this.Stat = stat;
+            this.Cost = cost;
+            if(hasLevel)
             {
-                throw new ArgumentOutOfRangeException();
-            }
-            else
-            {
-                this.level += num;
+                this.Level = level;
             }
         }
 
         public void AddSubskill(Skill subskill)
         {
-            if(this.subSkills == null)
+            if(this.SubSkills == null)
             {
-                this.subSkills = new List<Skill>();
+                this.SubSkills = new List<Skill>();
             }
             else
             {
-                this.subSkills.Add(subskill);
+                this.SubSkills.Add(subskill);
             }
         }
 
@@ -106,8 +136,8 @@ namespace Nero
             var embed = new EmbedBuilder()
                 .WithTitle("Stat Distribution")
                 .WithDescription("Distribute stat points of your character from 2 to 8")
-                .AddField($"Current Stat: {names.stats[num]}", $"lvl: {character.stats[num]}")
-                .AddField("Available points:", character.distrPoints[0])
+                .AddField($"Current Stat: {names.stats[num]}", $"lvl: {character.Stats[num]}")
+                .AddField("Available points:", character.DistrPoints[0])
             ;
             var buttonMin = new ButtonBuilder()
                 .WithCustomId($"stat_minus_{num}")
@@ -235,7 +265,7 @@ namespace Nero
             {
                 if(component.Data.CustomId == "charCreateRole")
                 {
-                    character.role = component.Data.Values.First();
+                    character.Role = component.Data.Values.First();
 
                     await messageStatDistributor(character, component, 0);
                 

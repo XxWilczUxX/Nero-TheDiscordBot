@@ -136,11 +136,22 @@ namespace Nero
             }
         }
 
+        [JsonConstructor]
+        public Skill(string Name, int? Level, int? Stat, int? Cost, List<Skill>? SubSkills)
+        {
+            this.Name = Name;
+            this.Level = Level;
+            this.Stat = Stat;
+            this.Cost = Cost;
+            this.SubSkills = SubSkills;
+        }
+
         public Skill(string name, int level) // Subskill
         {
             this.Name = name;
             this.Level = level;
         }
+        
 
         public void AddSubskill(Skill subskill)
         {

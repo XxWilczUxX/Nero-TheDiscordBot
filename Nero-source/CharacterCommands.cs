@@ -16,7 +16,7 @@ namespace Nero
         public string Role {get; set;} = string.Empty;
         public int[] Stats {get; set;} = new int[10];
         public Skill[] Skills {get; set;} = new Skill[65];
-        public int[] DistrPoints {get;} = new int[] {42, 58};
+        public int[] DistrPoints {get; set;} = new int[] {42, 58};
         
         public Character(string name, string description)
         {
@@ -108,11 +108,17 @@ namespace Nero
 
         }
 
-        public void PointsAllocation(int stat, int num)
+        public void AddLevelStat(int stat, int num = 1)
         {
-            
-            
-
+            if(this.DistrPoints[0] == 0 || (num < 1 && this.Stats[stat] == 2))
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            else
+            {
+                this.Stats[stat] += num;
+                this.DistrPoints[0] -= num;
+            }
         }
 
     }
@@ -158,12 +164,8 @@ namespace Nero
             if(this.SubSkills == null)
             {
                 this.SubSkills = new List<Skill>();
-                this.SubSkills.Add(subskill);
             }
-            else
-            {
-                this.SubSkills.Add(subskill);
-            }
+            this.SubSkills.Add(subskill);
         }
 
     }
@@ -313,6 +315,7 @@ namespace Nero
             {   
                 var embeds = new Nero.Embeds();
                 await component.RespondAsync(embed: embeds.Error("No character file in temp").Build());
+                throw new FileNotFoundException();
             }
             else
             {
@@ -325,7 +328,36 @@ namespace Nero
                 }
                 else
                 {
-                    
+                    string[] id = component.Data.CustomId.Split("_").ToArray();
+                    string action = id[1];
+                    int num;
+                    int.TryParse(id[2], out num);
+
+
+                    switch(action)
+                    {
+                        case "minus":
+                            character.AddLevelStat(num, -1);
+                            await messageStatDistributor(character, component, num);
+                            break;
+                        case "plus":
+                            if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
+                            {
+                                character.AddLevelStat(num);
+                            }
+                            await messageStatDistributor(character, component, num);
+                            break;
+                        case "back":
+                            await messageStatDistributor(character, component, num == 0? 9 : num-1);
+                            break;
+                        case "next":
+                            await messageStatDistributor(character, component, num == 9? 0 : num+1);
+                            break;
+                        case "confirm":
+
+                            break;
+                    }
+
                 }
             }
         }

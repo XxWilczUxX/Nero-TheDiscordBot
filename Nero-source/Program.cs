@@ -133,6 +133,7 @@ namespace Nero
 
         private async Task ButtonHandler(SocketMessageComponent component)
         {
+            // Syntax: type_action_num
             string type = component.Data.CustomId.Split("_").First();
             string action = component.Data.CustomId.Split("_").ToArray()[1];
             switch(type)

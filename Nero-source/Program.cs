@@ -32,9 +32,17 @@ namespace Nero
         private DiscordSocketClient _client = new DiscordSocketClient();
         private CommandService _commands = new CommandService();
         
-        private Info info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
+        private Info info = new Info();
         public async Task MainAsync()
-        {   
+        {
+
+#pragma warning disable CS8601 // Possible null reference assignment.
+            info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
+#pragma warning restore CS8601 // Possible null reference assignment.
+            if (info == null)
+            {
+                info = new Info();
+            }
 
             _client = new DiscordSocketClient();
             _commands = new CommandService();

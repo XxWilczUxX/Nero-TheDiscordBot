@@ -13,7 +13,7 @@ namespace Nero
     {
         public string Name;
         public string Description;
-        public string Role {get; set;}
+        public string Role {get; set;} = string.Empty;
         public int[] Stats {get; set;} = new int[10];
         public Skill[] Skills {get; set;} = new Skill[65];
         public int[] DistrPoints {get;} = new int[] {42, 58};

@@ -139,12 +139,14 @@ namespace Nero
             switch(type)
             {
                 case "stat":
+                case "skill":
                     switch(action)
                     {
                         case "minus":
                         case "plus":
                         case "back":
                         case "next":
+                        case "confirm":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);
                             break;

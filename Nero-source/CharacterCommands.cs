@@ -110,7 +110,7 @@ namespace Nero
 
         public void AddLevelStat(int stat, int num = 1)
         {
-            if(this.DistrPoints[0] == 0 || (num < 1 && this.Stats[stat] == 2))
+            if((num > 0 && this.DistrPoints[0] == 0) || (num < 0 && this.Stats[stat] == 2))
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -118,6 +118,24 @@ namespace Nero
             {
                 this.Stats[stat] += num;
                 this.DistrPoints[0] -= num;
+            }
+        }
+
+        public void AddLevelSkill(int skill, int num = 1)
+        {
+            if((num > 0 && this.DistrPoints[1] - this.Skills[skill].Cost < 0) || (num < 0 && this.Skills[skill].Level == 2 && ( skill == 5 || skill == 8 || skill == 13 || skill == 8 || skill == 19 || skill == 24 || skill == 25 || skill == 31 || skill == 32 || skill == 47 || skill == 52 || skill == 54 || skill == 55 || skill == 59 || skill == 62 )))
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            else if(this.Skills[skill].Level != null)
+            {
+                this.Skills[skill].Level += num;
+                int? cost = this.Skills[skill].Cost;
+                Console.WriteLine(cost);
+                if(cost != null)
+                {
+                    this.DistrPoints[1] -= num * (int)cost;
+                }
             }
         }
 
@@ -183,40 +201,40 @@ namespace Nero
             }
         }
 
-        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num)
+        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string action)
         {
 
             var names = new Nero.Names();
 
             var embed = new EmbedBuilder()
-                .WithTitle("Stat Distribution")
-                .WithDescription("Distribute stat points of your character from 2 to 8")
-                .AddField($"Current Stat: {names.stats[num]}", $"lvl: {character.Stats[num]}")
-                .AddField("Available points:", character.DistrPoints[0])
+                .WithTitle($"{action} Distribution")
+                .WithDescription($"Distribute {action} points of your character from 2 to 8")
+                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}")
+                .AddField("Available points:", character.DistrPoints[action == "stat"? 0 : 1])
             ;
             var buttonMin = new ButtonBuilder()
-                .WithCustomId($"stat_minus_{num}")
+                .WithCustomId($"{action}_minus_{num}")
                 .WithLabel("-")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonPlus = new ButtonBuilder()
-                .WithCustomId($"stat_plus_{num}")
+                .WithCustomId($"{action}_plus_{num}")
                 .WithLabel("+")
                 .WithStyle(ButtonStyle.Success)
             ;
             var buttonBack = new ButtonBuilder()
-                .WithCustomId($"stat_back_{num}")
+                .WithCustomId($"{action}_back_{num}")
                 .WithLabel("Previous")
                 .WithStyle(ButtonStyle.Primary)
             ;
             var buttonNext = new ButtonBuilder()
-                .WithCustomId($"stat_next_{num}")
+                .WithCustomId($"{action}_next_{num}")
                 .WithLabel("Next")
                 .WithStyle(ButtonStyle.Primary)
             ;
 
             var buttonConfirm = new ButtonBuilder()
-                .WithCustomId("stat_confirm")
+                .WithCustomId($"{action}_confirm")
                 .WithLabel("Confirm")
                 .WithStyle(ButtonStyle.Secondary)
             ;
@@ -323,41 +341,73 @@ namespace Nero
                 {
                     character.Role = component.Data.Values.First();
 
-                    await messageStatDistributor(character, component, 0);
+                    await messageStatDistributor(character, component, 0, "stat");
                 
                 }
                 else
                 {
                     string[] id = component.Data.CustomId.Split("_").ToArray();
+                    string type = id[0];
                     string action = id[1];
-                    int num;
-                    int.TryParse(id[2], out num);
-
-
-                    switch(action)
-                    {
-                        case "minus":
-                            character.AddLevelStat(num, -1);
-                            await messageStatDistributor(character, component, num);
-                            break;
-                        case "plus":
-                            if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
-                            {
-                                character.AddLevelStat(num);
-                            }
-                            await messageStatDistributor(character, component, num);
-                            break;
-                        case "back":
-                            await messageStatDistributor(character, component, num == 0? 9 : num-1);
-                            break;
-                        case "next":
-                            await messageStatDistributor(character, component, num == 9? 0 : num+1);
-                            break;
-                        case "confirm":
-
-                            break;
+                    int num = 0;
+                    if(id.Length > 2){
+                        int.TryParse(id[2], out num);
                     }
 
+                    if(type == "stat")
+                    {
+                        switch(action)
+                        {
+                            case "minus":
+                                try{ character.AddLevelStat(num, -1); }
+                                finally{}
+                                await messageStatDistributor(character, component, num, "stat");
+                                break;
+                            case "plus":
+                                if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
+                                {
+                                    character.AddLevelStat(num);
+                                }
+                                await messageStatDistributor(character, component, num, "stat");
+                                break;
+                            case "back":
+                                await messageStatDistributor(character, component, num == 0? 9 : num-1, "stat");
+                                break;
+                            case "next":
+                                await messageStatDistributor(character, component, num == 9? 0 : num+1, "stat");
+                                break;
+                            case "confirm":
+                                await messageStatDistributor(character, component, 0, "skill");
+                                break;
+                        }
+                    }
+                    else if(type == "skill")
+                    {
+                        switch(action)
+                        {
+                            case "minus":
+                                try{ character.AddLevelSkill(num, -1); }
+                                finally{}
+                                await messageStatDistributor(character, component, num, "skill");
+                                break;
+                            case "plus":
+                                if(character.DistrPoints[1] - character.Skills[num].Cost >= 0 && character.Skills[num].Level < 8 )
+                                {
+                                    character.AddLevelSkill(num);
+                                }
+                                await messageStatDistributor(character, component, num, "skill");
+                                break;
+                            case "back":
+                                await messageStatDistributor(character, component, num == 0? 64 : num-1, "skill");
+                                break;
+                            case "next":
+                                await messageStatDistributor(character, component, num == 64? 0 : num+1, "skill");
+                                break;
+                            case "confirm":
+                                await messageStatDistributor(character, component, 0, "skill");
+                                break;
+                        }
+                    }
                 }
             }
         }

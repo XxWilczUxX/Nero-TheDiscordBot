@@ -143,6 +143,20 @@ namespace Nero
             }
         }
 
+        public void MinStat(int stat)
+        {
+            int? level = this.Stats[stat];
+            this.DistrPoints[0] += (int)level- 2;
+            this.Stats[stat] = 2;
+        }
+
+        public void MaxStat(int stat)
+        {
+            int? level = this.Stats[stat];
+            this.DistrPoints[0] -= 8 - (int)level;
+            this.Stats[stat] = 8;
+        }
+
         public void MinSkill(int skill)
         {
             if( skill == 6 || skill == 9 || skill == 14 || skill == 9 || skill == 19 || skill == 25 || skill == 26 || skill == 32 || skill == 33 || skill == 48 || skill == 53 || skill == 55 || skill == 56 || skill == 60 || skill == 63 )
@@ -173,11 +187,17 @@ namespace Nero
             int? level = this.Skills[skill].Level;
             if(cost != null && level != null)
             {
-                if((8 - (int)level) * (int)cost <= this.DistrPoints[1])
+                int num;
+                if((8 - (int)level) * (int)cost > this.DistrPoints[1])
                 {                        
-                    this.DistrPoints[1] -= (8 - (int)level) * (int)cost;
-                    this.Skills[skill].Level = 8;
-                }            
+                    num = this.DistrPoints[1];    
+                }   
+                else
+                {
+                    num = 8;
+                }
+                this.DistrPoints[1] -= (num - (int)level) * (int)cost;
+                this.Skills[skill].Level = num;         
             }
         }
 
@@ -195,9 +215,9 @@ namespace Nero
         {
             this.Name = name;
             this.Stat = stat;
-            this.Cost = cost;
             if(hasLevel)
             {
+                this.Cost = cost;
                 this.Level = level;
             }
         }
@@ -216,6 +236,7 @@ namespace Nero
         {
             this.Name = name;
             this.Level = level;
+            this.Cost = 1;
         }
         
 
@@ -254,52 +275,66 @@ namespace Nero
                 .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num-1]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}\nCost: {(action == "stat"? 1 : character.Skills[num].Cost)}")
                 .AddField("Available points:", character.DistrPoints[action == "stat"? 0 : 1])
             ;
-            var buttonMin = new ButtonBuilder()
+            var buttonMinus = new ButtonBuilder()
                 .WithCustomId($"{action}_minus_{num}")
-                .WithLabel("-")
+                .WithLabel("-1")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonPlus = new ButtonBuilder()
                 .WithCustomId($"{action}_plus_{num}")
-                .WithLabel("+")
+                .WithLabel("+1")
                 .WithStyle(ButtonStyle.Success)
             ;
             var buttonBack = new ButtonBuilder()
                 .WithCustomId($"{action}_back_{num}")
-                .WithLabel("Previous")
+                .WithLabel("<")
                 .WithStyle(ButtonStyle.Primary)
             ;
             var buttonNext = new ButtonBuilder()
                 .WithCustomId($"{action}_next_{num}")
-                .WithLabel("Next")
+                .WithLabel(">")
                 .WithStyle(ButtonStyle.Primary)
             ;
-
-            var buttonConfirm = new ButtonBuilder()
-                .WithCustomId($"{action}_confirm")
-                .WithLabel("Confirm")
-                .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(character.DistrPoints[action == "stat"? 0 : 1] == 0? false : true)
-            ;
-            var min = new ButtonBuilder()
+            var buttonMin = new ButtonBuilder()
                 .WithCustomId($"{action}_min_{num}")
                 .WithLabel("min")
                 .WithStyle(ButtonStyle.Danger)
             ;
-            var max = new ButtonBuilder()
+            var buttonMax = new ButtonBuilder()
                 .WithCustomId($"{action}_max_{num}")
                 .WithLabel("max")
                 .WithStyle(ButtonStyle.Success)
             ;
 
+            var buttonDown = new ButtonBuilder()
+                .WithCustomId($"{action}_down_{num}")
+                .WithLabel("\\/")
+                .WithStyle(ButtonStyle.Primary)
+            ;
+
+            var buttonUp = new ButtonBuilder()
+                .WithCustomId($"{action}_up_{num}")
+                .WithLabel("/\\")
+                .WithStyle(ButtonStyle.Primary)
+            ;
+
+            var buttonConfirm = new ButtonBuilder()
+                .WithCustomId($"{action}_confirm")
+                .WithLabel("----------------- .Confirm. ----------------")
+                .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(character.DistrPoints[action == "stat"? 0 : 1] == 0? false : true)
+            ;
+
             var builder = new ComponentBuilder()
-                .WithButton(buttonMin)
-                .WithButton(buttonBack)
-                .WithButton(buttonNext)
-                .WithButton(buttonPlus)
-                .WithButton(buttonConfirm, 1)
-                .WithButton(min, 1)
-                .WithButton(max, 1)
+                .WithButton(buttonDown, 0)
+                .WithButton(buttonBack, 0)
+                .WithButton(buttonNext, 0)
+                .WithButton(buttonUp, 0)
+                .WithButton(buttonMin, 1)
+                .WithButton(buttonMinus,1)
+                .WithButton(buttonPlus,1)
+                .WithButton(buttonMax, 1)
+                .WithButton(buttonConfirm, 2)
             ;
 
             File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
@@ -426,7 +461,7 @@ namespace Nero
                                 break;
 
                             case "min":
-                                try{ character.AddLevelStat(num, -1); }
+                                try{ character.MinStat(num); }
                                 catch(Exception ex){
                                     Console.WriteLine(ex.Message);
                                     await messageStatDistributor(character, component, num, "stat");
@@ -439,6 +474,14 @@ namespace Nero
                                 if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
                                 {
                                     character.AddLevelStat(num);
+                                }
+                                await messageStatDistributor(character, component, num, "stat");
+                                break;
+
+                            case "max":
+                                if(character.DistrPoints[0] >= 8 - character.Stats[num] && character.Stats[num] < 8 )
+                                {
+                                    character.MaxStat(num);
                                 }
                                 await messageStatDistributor(character, component, num, "stat");
                                 break;
@@ -507,7 +550,7 @@ namespace Nero
                                 break;
 
                             case "confirm":
-                                await messageStatDistributor(character, component, 0, "skill");
+                                await messageStatDistributor(character, component, 1, "skill");
                                 break;
                         }
                     }

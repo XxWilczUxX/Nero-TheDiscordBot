@@ -1,10 +1,6 @@
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Discord.Rest;
 
 namespace Nero
 {
@@ -13,9 +9,9 @@ namespace Nero
     {
         public string Name;
         public string Description;
-        public string Role {get; set;} = string.Empty;
+        public int Role {get; set;}
         public int[] Stats {get; set;} = new int[10];
-        public Skill[] Skills {get; set;} = new Skill[65];
+        public Skill[] Skills {get; set;} = new Skill[66];
         public int[] DistrPoints {get; set;} = new int[] {42, 58};
         
         public Character(string name, string description)
@@ -34,60 +30,61 @@ namespace Nero
             bool hasLevel;
             Skill? subskill = null;
 
-            for(int i = 0; i < Skills.Length; i++)
+            for(int i = 1; i < Skills.Length; i++)
             {
+                stat = 0;
                 cost = 1;
                 hasLevel = true;
                 level = 0;
                 subskill = null;
-                if(i == 7 || i == 9 || i == 10 || i == 31) // SW
+                if(i == 8 || i == 10 || i == 11 || i == 32) // SW
                 {
                     stat = 5;
                 }
-                else if(i == 52 || i == 54) // EMP
+                else if(i == 53 || i == 55) // EMP
                 {
                     stat = 4;
                 }
-                else if(i < 5 || (25 < i && i < 30)) // REF
+                else if(i < 6 || (26 < i && i < 31)) // REF
                 {
                     stat = 1;
                 }
-                else if((4 < i && i < 9) || (58 < i && i < 63)) // ZW
+                else if((5 < i && i < 10) || (59 < i && i < 64)) // ZW
                 {
                     stat = 2;
                 }
-                else if(i > 10 && i < 35) // INT
+                else if(i > 11 && i < 36) // INT
                 {
                     stat = 0;
                 }
-                else if((34 < i && i < 50) || i == 65) // TECH
+                else if((35 < i && i < 51) || i == 66) // TECH
                 {
                     stat = 3;
                 }
-                else // CHA
+                else if(i != 0) // CHA
                 {
                     stat = 9;
                 }
-                if(i == 0 || i == 4 || i == 27 || i == 36 || i == 41 || i == 49 || i == 61) // Cost
+                if(i == 1 || i == 5 || i == 28 || i == 37 || i == 42 || i == 50 || i == 62) // Cost
                 {
                     cost = 2;
                 }
 
-                if(i == 13 || i == 19 || i == 24 || i == 64) // Subskill skills
+                if(i == 14 || i == 20 || i == 25 || i == 65) // Subskill skills
                 {
                     hasLevel = false;
                 }
 
-                if(i == 5 || i == 8 || i == 13 || i == 8 || i == 19 || i == 24 || i == 25 || i == 31 || i == 32 || i == 47 || i == 52 || i == 54 || i == 55 || i == 59 || i == 62) // Primary level allocation or creation of primary subskill
+                if(i == 6 || i == 9 || i == 14 || i == 9 || i == 20 || i == 25 || i == 26 || i == 32 || i == 33 || i == 48 || i == 53 || i == 55 || i == 56 || i == 60 || i == 63) // Primary level allocation or creation of primary subskill
                 {
                     if(!hasLevel)
                     {
                         switch(i)
                         {
-                            case 13: // Language
+                            case 14: // Language
                                 subskill = new Skill(names.subskills[0], 2);
                                 break;
-                            case 24: // Local Knowlege
+                            case 25: // Local Knowlege
                                 subskill = new Skill(names.subskills[1], 2);
                                 break;
                         }
@@ -97,8 +94,8 @@ namespace Nero
                         level = 2;
                     }
                 }
-
-                this.Skills[i] = new Skill(names.skills[i], stat, cost, hasLevel, level);
+                
+                this.Skills[i] = new Skill(names.skills[i-1], stat, cost, hasLevel, level);
                 if(subskill != null)
                 {
                     this.Skills[i].AddSubskill(subskill);
@@ -106,6 +103,13 @@ namespace Nero
 
             }
 
+        }
+
+        public void SetRole(int role, int level)
+        {
+            Names names = new Names();
+            this.Role = role;
+            this.Skills[0] = new Skill(names.roles[1,this.Role], level);
         }
 
         public void AddLevelStat(int stat, int num = 1)
@@ -131,7 +135,6 @@ namespace Nero
             {
                 this.Skills[skill].Level += num;
                 int? cost = this.Skills[skill].Cost;
-                Console.WriteLine(cost);
                 if(cost != null)
                 {
                     this.DistrPoints[1] -= num * (int)cost;
@@ -209,7 +212,7 @@ namespace Nero
             var embed = new EmbedBuilder()
                 .WithTitle($"{action} Distribution")
                 .WithDescription($"Distribute {action} points of your character from 2 to 8")
-                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}")
+                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num-1]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}")
                 .AddField("Available points:", character.DistrPoints[action == "stat"? 0 : 1])
             ;
             var buttonMin = new ButtonBuilder()
@@ -305,16 +308,16 @@ namespace Nero
                 .WithPlaceholder("Choose character's role.")
                 .WithMinValues(1)
                 .WithMaxValues(1)
-                .AddOption("Solo", "solo", "Lethal combat specialists skilled in weaponry, tactics, and survival.")
-                .AddOption("Netrunner", "netrunner", "Quick-hacking experts who manipulate cyberspace and infiltrate computer systems.")
-                .AddOption("Techie", "techie", "Inventive mechanics and engineers who excel at crafting and repairing technology.")
-                .AddOption("Media", "media", "Hard-hitting journalists and media personalities who uncover secrets and shape public opinion.")
-                .AddOption("Cop", "cop", "Duty-bound enforcers of the law, maintaining order in a chaotic world.")
-                .AddOption("Nomad", "nomad", "Range-riding wanderers who thrive in the wastelands between cities, skilled in survival and more.")
-                .AddOption("Fixer", "fixer", "Clever negotiators and dealmakers who connect people and facilitate transactions.")
-                .AddOption("Corporate", "corporat", "Scheming corporate executives who wield power and influence behind the scenes.")
-                .AddOption("Medtech", "medtech", "Lifesaving healers and medics who can also take lives when necessary.")
-                .AddOption("Rockerboy / Rockergirl", "rocker", "Charismatic rebels who use music, art, and charisma to inspire and lead others.")
+                .AddOption("Solo", "0", "Lethal combat specialists skilled in weaponry, tactics, and survival.")
+                .AddOption("Netrunner", "1", "Quick-hacking experts who manipulate cyberspace and infiltrate computer systems.")
+                .AddOption("Techie", "2", "Inventive mechanics and engineers who excel at crafting and repairing technology.")
+                .AddOption("Media", "3", "Hard-hitting journalists and media personalities who uncover secrets and shape public opinion.")
+                .AddOption("Cop", "4", "Duty-bound enforcers of the law, maintaining order in a chaotic world.")
+                .AddOption("Nomad", "5", "Range-riding wanderers who thrive in the wastelands between cities, skilled in survival and more.")
+                .AddOption("Fixer", "6", "Clever negotiators and dealmakers who connect people and facilitate transactions.")
+                .AddOption("Corporate", "7", "Scheming corporate executives who wield power and influence behind the scenes.")
+                .AddOption("Medtech", "8", "Lifesaving healers and medics who can also take lives when necessary.")
+                .AddOption("Rockerboy / Rockergirl", "9", "Charismatic rebels who use music, art, and charisma to inspire and lead others.")
             ;
 
             var componentBuilder = new ComponentBuilder()
@@ -339,14 +342,16 @@ namespace Nero
             {
                 if(component.Data.CustomId == "charCreateRole")
                 {
-                    character.Role = component.Data.Values.First();
+                    int role;
+                    int.TryParse(component.Data.Values.First(),out role);
+                    character.SetRole(role, 4);
 
                     await messageStatDistributor(character, component, 0, "stat");
                 
                 }
                 else
                 {
-                    string[] id = component.Data.CustomId.Split("_").ToArray();
+                    string[] id = component.Data.CustomId.Split("_").ToArray(); 
                     string type = id[0];
                     string action = id[1];
                     int num = 0;
@@ -377,7 +382,7 @@ namespace Nero
                                 await messageStatDistributor(character, component, num == 9? 0 : num+1, "stat");
                                 break;
                             case "confirm":
-                                await messageStatDistributor(character, component, 0, "skill");
+                                await messageStatDistributor(character, component, 1, "skill");
                                 break;
                         }
                     }
@@ -398,10 +403,10 @@ namespace Nero
                                 await messageStatDistributor(character, component, num, "skill");
                                 break;
                             case "back":
-                                await messageStatDistributor(character, component, num == 0? 64 : num-1, "skill");
+                                await messageStatDistributor(character, component, num == 1? 65 : num-1, "skill");
                                 break;
                             case "next":
-                                await messageStatDistributor(character, component, num == 64? 0 : num+1, "skill");
+                                await messageStatDistributor(character, component, num == 65? 1 : num+1, "skill");
                                 break;
                             case "confirm":
                                 await messageStatDistributor(character, component, 0, "skill");

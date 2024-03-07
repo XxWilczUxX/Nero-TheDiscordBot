@@ -152,9 +152,14 @@ namespace Nero
 
         public void MaxStat(int stat)
         {
+            int num = 8;
+            if(this.DistrPoints[0] < num - this.Stats[stat] )
+            {
+                num = this.DistrPoints[0];
+            }
             int? level = this.Stats[stat];
-            this.DistrPoints[0] -= 8 - (int)level;
-            this.Stats[stat] = 8;
+            this.DistrPoints[0] -= num;
+            this.Stats[stat] += num;
         }
 
         public void MinSkill(int skill)
@@ -479,10 +484,7 @@ namespace Nero
                                 break;
 
                             case "max":
-                                if(character.DistrPoints[0] >= 8 - character.Stats[num] && character.Stats[num] < 8 )
-                                {
-                                    character.MaxStat(num);
-                                }
+                                character.MaxStat(num);
                                 await messageStatDistributor(character, component, num, "stat");
                                 break;
 

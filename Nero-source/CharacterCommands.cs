@@ -70,12 +70,12 @@ namespace Nero
                     cost = 2;
                 }
 
-                if(i == 14 || i == 20 || i == 25 || i == 65) // Subskill skills
+                if(i == 14 || i == 19 || i == 25 || i == 65) // Subskill skills
                 {
                     hasLevel = false;
                 }
 
-                if(i == 6 || i == 9 || i == 14 || i == 9 || i == 20 || i == 25 || i == 26 || i == 32 || i == 33 || i == 48 || i == 53 || i == 55 || i == 56 || i == 60 || i == 63) // Primary level allocation or creation of primary subskill
+                if(i == 6 || i == 9 || i == 14 || i == 9 || i == 19 || i == 25 || i == 26 || i == 32 || i == 33 || i == 48 || i == 53 || i == 55 || i == 56 || i == 60 || i == 63) // Primary level allocation or creation of primary subskill
                 {
                     if(!hasLevel)
                     {
@@ -127,11 +127,12 @@ namespace Nero
 
         public void AddLevelSkill(int skill, int num = 1)
         {
-            if((num > 0 && this.DistrPoints[1] - this.Skills[skill].Cost < 0) || (num < 0 && this.Skills[skill].Level == 2 && ( skill == 5 || skill == 8 || skill == 13 || skill == 8 || skill == 19 || skill == 24 || skill == 25 || skill == 31 || skill == 32 || skill == 47 || skill == 52 || skill == 54 || skill == 55 || skill == 59 || skill == 62 )))
+            if((num > 0 && this.DistrPoints[1] - this.Skills[skill].Cost < 0) || (num < 0 && this.Skills[skill].Level == 2 && ( skill == 6 || skill == 9 || skill == 14 || skill == 9 || skill == 19 || skill == 25 || skill == 26 || skill == 32 || skill == 33 || skill == 48 || skill == 53 || skill == 55 || skill == 56 || skill == 60 || skill == 63 )))
             {
                 throw new ArgumentOutOfRangeException();
             }
-            else if(this.Skills[skill].Level != null)
+            
+            if(this.Skills[skill].Level != null)
             {
                 this.Skills[skill].Level += num;
                 int? cost = this.Skills[skill].Cost;
@@ -139,6 +140,44 @@ namespace Nero
                 {
                     this.DistrPoints[1] -= num * (int)cost;
                 }
+            }
+        }
+
+        public void MinSkill(int skill)
+        {
+            if( skill == 6 || skill == 9 || skill == 14 || skill == 9 || skill == 19 || skill == 25 || skill == 26 || skill == 32 || skill == 33 || skill == 48 || skill == 53 || skill == 55 || skill == 56 || skill == 60 || skill == 63 )
+            {
+                int? cost = this.Skills[skill].Cost;
+                int? level = this.Skills[skill].Level;
+                if(cost != null && level != null)
+                {
+                    this.DistrPoints[1] += ((int)level- 2) * (int)cost;
+                    this.Skills[skill].Level = 2;
+                }
+            }
+            else
+            {
+                int? cost = this.Skills[skill].Cost;
+                int? level = this.Skills[skill].Level;
+                if(cost != null && level != null)
+                {
+                    this.DistrPoints[1] += (int)level * (int)cost;
+                    this.Skills[skill].Level = 0;
+                }
+            }
+        }
+
+        public void MaxSkill(int skill)
+        {
+            int? cost = this.Skills[skill].Cost;
+            int? level = this.Skills[skill].Level;
+            if(cost != null && level != null)
+            {
+                if((8 - (int)level) * (int)cost <= this.DistrPoints[1])
+                {                        
+                    this.DistrPoints[1] -= (8 - (int)level) * (int)cost;
+                    this.Skills[skill].Level = 8;
+                }            
             }
         }
 
@@ -210,9 +249,9 @@ namespace Nero
             var names = new Nero.Names();
 
             var embed = new EmbedBuilder()
-                .WithTitle($"{action} Distribution")
+                .WithTitle($"S{action.Substring(1)} Distribution")
                 .WithDescription($"Distribute {action} points of your character from 2 to 8")
-                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num-1]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}")
+                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num-1]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}\nCost: {(action == "stat"? 1 : character.Skills[num].Cost)}")
                 .AddField("Available points:", character.DistrPoints[action == "stat"? 0 : 1])
             ;
             var buttonMin = new ButtonBuilder()
@@ -240,6 +279,17 @@ namespace Nero
                 .WithCustomId($"{action}_confirm")
                 .WithLabel("Confirm")
                 .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(character.DistrPoints[action == "stat"? 0 : 1] == 0? false : true)
+            ;
+            var min = new ButtonBuilder()
+                .WithCustomId($"{action}_min_{num}")
+                .WithLabel("min")
+                .WithStyle(ButtonStyle.Danger)
+            ;
+            var max = new ButtonBuilder()
+                .WithCustomId($"{action}_max_{num}")
+                .WithLabel("max")
+                .WithStyle(ButtonStyle.Success)
             ;
 
             var builder = new ComponentBuilder()
@@ -248,6 +298,8 @@ namespace Nero
                 .WithButton(buttonNext)
                 .WithButton(buttonPlus)
                 .WithButton(buttonConfirm, 1)
+                .WithButton(min, 1)
+                .WithButton(max, 1)
             ;
 
             File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
@@ -365,9 +417,24 @@ namespace Nero
                         {
                             case "minus":
                                 try{ character.AddLevelStat(num, -1); }
-                                finally{}
+                                catch(Exception ex){
+                                    Console.WriteLine(ex.Message);
+                                    await messageStatDistributor(character, component, num, "stat");
+                                    break;
+                                }
                                 await messageStatDistributor(character, component, num, "stat");
                                 break;
+
+                            case "min":
+                                try{ character.AddLevelStat(num, -1); }
+                                catch(Exception ex){
+                                    Console.WriteLine(ex.Message);
+                                    await messageStatDistributor(character, component, num, "stat");
+                                    break;
+                                }
+                                await messageStatDistributor(character, component, num, "stat");
+                                break;
+
                             case "plus":
                                 if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
                                 {
@@ -375,12 +442,15 @@ namespace Nero
                                 }
                                 await messageStatDistributor(character, component, num, "stat");
                                 break;
+
                             case "back":
                                 await messageStatDistributor(character, component, num == 0? 9 : num-1, "stat");
                                 break;
+
                             case "next":
                                 await messageStatDistributor(character, component, num == 9? 0 : num+1, "stat");
                                 break;
+
                             case "confirm":
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;
@@ -392,9 +462,24 @@ namespace Nero
                         {
                             case "minus":
                                 try{ character.AddLevelSkill(num, -1); }
-                                finally{}
+                                catch(Exception ex){
+                                    Console.WriteLine(ex.Message);
+                                    await messageStatDistributor(character, component, num, "skill");
+                                    break;
+                                }
                                 await messageStatDistributor(character, component, num, "skill");
                                 break;
+
+                            case "min":
+                                try{ character.MinSkill(num); }
+                                catch(Exception ex){
+                                    Console.WriteLine(ex.Message);
+                                    await messageStatDistributor(character, component, num, "skill");
+                                    break;
+                                }
+                                await messageStatDistributor(character, component, num, "skill");
+                                break;
+
                             case "plus":
                                 if(character.DistrPoints[1] - character.Skills[num].Cost >= 0 && character.Skills[num].Level < 8 )
                                 {
@@ -402,12 +487,25 @@ namespace Nero
                                 }
                                 await messageStatDistributor(character, component, num, "skill");
                                 break;
+
+                            case "max":
+                                try{ character.MaxSkill(num); }
+                                catch(Exception ex){
+                                    Console.WriteLine(ex.Message);
+                                    await messageStatDistributor(character, component, num, "skill");
+                                    break;
+                                }
+                                await messageStatDistributor(character, component, num, "skill");
+                                break;
+
                             case "back":
                                 await messageStatDistributor(character, component, num == 1? 65 : num-1, "skill");
                                 break;
+
                             case "next":
                                 await messageStatDistributor(character, component, num == 65? 1 : num+1, "skill");
                                 break;
+
                             case "confirm":
                                 await messageStatDistributor(character, component, 0, "skill");
                                 break;

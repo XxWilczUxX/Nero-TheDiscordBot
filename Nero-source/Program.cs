@@ -145,6 +145,8 @@ namespace Nero
                         case "back":
                         case "next":
                         case "confirm":
+                        case "min":
+                        case "max":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);
                             break;

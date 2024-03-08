@@ -141,6 +141,8 @@ namespace Nero
                     switch(action)
                     {
                         case "add":
+                        case "moveHor":
+                        case "moveVer":
                         case "confirm":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);

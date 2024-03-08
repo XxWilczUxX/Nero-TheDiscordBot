@@ -197,27 +197,67 @@ namespace Nero
                     string[] customID = component.Data.CustomId.Split("_").ToArray(); 
                     string type = customID[0];
                     string action = customID[1];
-
+                    int id;
                     if(type == "stat")
                     {
                         switch(action)
                         {
+
+                            case "moveHor":
+                                
+                                id = int.Parse(customID[2]);
+                                int num = int.Parse(customID[3]);
+                                if(id + num < 0)
+                                {
+                                    id = 9;
+                                }
+                                else if(id + num > 9)
+                                {
+                                    id = 0;
+                                }
+                                else
+                                {
+                                    id += num;
+                                }
+                                await messageStatDistributor(character, component, id, "stat");
+                                break;
+
                             case "add":
-                                int id = int.Parse(customID[2]);
+                                id = int.Parse(customID[2]);
                                 character.DistributePoints(type, id, int.Parse(customID[3]), new int[] {2,8});
                                 await messageStatDistributor(character, component, id, "stat");
                                 break;
                             case "confirm":
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;
+                            
                         }
                     }
                     else if(type == "skill")
                     {
                         switch(action)
                         {
+                            case "moveHor":
+                                
+                                id = int.Parse(customID[2]);
+                                int num = int.Parse(customID[3]);
+                                if(id + num < 1)
+                                {
+                                    id = 65;
+                                }
+                                else if(id + num > 65)
+                                {
+                                    id = 1;
+                                }
+                                else
+                                {
+                                    id += num;
+                                }
+                                await messageStatDistributor(character, component, id, "skill");
+                                break;
+
                             case "add":
-                                int id = int.Parse(customID[2]);
+                                id = int.Parse(customID[2]);
                                 int[] range = new int[] {0,8};
                                 if(id == 6 || id == 9 || id == 14 || id == 9 || id == 19 || id == 25 || id == 26 || id == 32 || id == 33 || id == 48 || id == 53 || id == 55 || id == 56 || id == 60 || id == 63){
                                     range[0] = 2;
@@ -228,6 +268,7 @@ namespace Nero
                             case "confirm":
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;
+                            
                         }
                     }
                 }

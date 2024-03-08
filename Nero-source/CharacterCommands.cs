@@ -18,65 +18,68 @@ namespace Nero
             }
         }
 
-        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string action)
+        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string type)
         {
 
             var names = new Nero.Names();
 
+            string name = type == "stat" ? names.stats[num] : names.skills[num-1];
+            int? level = type == "stat" ? character.Stats[num] : character.Skills[num].Level;
+            int? cost = type == "stat"? 1 : character.Skills[num].Cost;
+
             var embed = new EmbedBuilder()
-                .WithTitle($"S{action.Substring(1)} Distribution")
-                .WithDescription($"Distribute {action} points of your character from 2 to 8")
-                .AddField($"Current {action}: { (action == "stat"? names.stats[num] : names.skills[num-1]) }", $"lvl: {(action == "stat"? character.Stats[num] : character.Skills[num].Level)}\nCost: {(action == "stat"? 1 : character.Skills[num].Cost)}")
-                .AddField("Available points:", character.DistrPoints[action == "stat"? 0 : 1])
+                .WithTitle($"S{type.Substring(1)} Distribution")
+                .WithDescription($"Distribute {type} points.")
+                .AddField($"Current {type}: {name}", $"lvl: {level}\nCost: {cost}")
+                .AddField("Available points:", character.DistrPoints[type == "stat"? 0 : 1])
             ;
             var buttonMinus = new ButtonBuilder()
-                .WithCustomId($"{action}_minus_{num}")
+                .WithCustomId($"{type}_add_{num}_-1")
                 .WithLabel("-1")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonPlus = new ButtonBuilder()
-                .WithCustomId($"{action}_plus_{num}")
+                .WithCustomId($"{type}_add_{num}_1")
                 .WithLabel("+1")
                 .WithStyle(ButtonStyle.Success)
             ;
-            var buttonBack = new ButtonBuilder()
-                .WithCustomId($"{action}_back_{num}")
-                .WithLabel("<")
-                .WithStyle(ButtonStyle.Primary)
-            ;
-            var buttonNext = new ButtonBuilder()
-                .WithCustomId($"{action}_next_{num}")
-                .WithLabel(">")
-                .WithStyle(ButtonStyle.Primary)
-            ;
             var buttonMin = new ButtonBuilder()
-                .WithCustomId($"{action}_min_{num}")
+                .WithCustomId($"{type}_add_{num}_-8")
                 .WithLabel("min")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonMax = new ButtonBuilder()
-                .WithCustomId($"{action}_max_{num}")
+                .WithCustomId($"{type}_add_{num}_8")
                 .WithLabel("max")
                 .WithStyle(ButtonStyle.Success)
             ;
 
+            var buttonBack = new ButtonBuilder()
+                .WithCustomId($"{type}_moveHor_{num}_-1")
+                .WithLabel("<")
+                .WithStyle(ButtonStyle.Primary)
+            ;
+            var buttonNext = new ButtonBuilder()
+                .WithCustomId($"{type}_moveHor_{num}_1")
+                .WithLabel(">")
+                .WithStyle(ButtonStyle.Primary)
+            ;
             var buttonDown = new ButtonBuilder()
-                .WithCustomId($"{action}_down_{num}")
+                .WithCustomId($"{type}_moveVer_{num}_-1")
                 .WithLabel("\\/")
                 .WithStyle(ButtonStyle.Primary)
             ;
-
             var buttonUp = new ButtonBuilder()
-                .WithCustomId($"{action}_up_{num}")
+                .WithCustomId($"{type}_moveVer_{num}_1")
                 .WithLabel("/\\")
                 .WithStyle(ButtonStyle.Primary)
             ;
 
             var buttonConfirm = new ButtonBuilder()
-                .WithCustomId($"{action}_confirm")
+                .WithCustomId($"{type}_confirm")
                 .WithLabel("----------------- .Confirm. ----------------")
                 .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(character.DistrPoints[action == "stat"? 0 : 1] == 0? false : true)
+                .WithDisabled(character.DistrPoints[type == "stat"? 0 : 1] == 0? false : true)
             ;
 
             var builder = new ComponentBuilder()
@@ -181,7 +184,7 @@ namespace Nero
             }
             else
             {
-                if(component.Data.CustomId == "charCreateRole")
+                if(component.Data.CustomId == "charCreateRole") // select menu
                 {
                     int role;
                     int.TryParse(component.Data.Values.First(),out role);
@@ -189,61 +192,21 @@ namespace Nero
 
                     await messageStatDistributor(character, component, 0, "stat");
                 }
-                else
+                else // buttons
                 {
-                    string[] id = component.Data.CustomId.Split("_").ToArray(); 
-                    string type = id[0];
-                    string action = id[1];
-                    int num = 0;
-                    if(id.Length > 2){
-                        int.TryParse(id[2], out num);
-                    }
+                    string[] customID = component.Data.CustomId.Split("_").ToArray(); 
+                    string type = customID[0];
+                    string action = customID[1];
 
                     if(type == "stat")
                     {
                         switch(action)
                         {
-                            case "minus":
-                                try{ character.AddLevelStat(num, -1); }
-                                catch(Exception ex){
-                                    Console.WriteLine(ex.Message);
-                                    await messageStatDistributor(character, component, num, "stat");
-                                    break;
-                                }
-                                await messageStatDistributor(character, component, num, "stat");
+                            case "add":
+                                int id = int.Parse(customID[2]);
+                                character.DistributePoints(type, id, int.Parse(customID[3]), new int[] {2,8});
+                                await messageStatDistributor(character, component, id, "stat");
                                 break;
-
-                            case "min":
-                                try{ character.MinStat(num); }
-                                catch(Exception ex){
-                                    Console.WriteLine(ex.Message);
-                                    await messageStatDistributor(character, component, num, "stat");
-                                    break;
-                                }
-                                await messageStatDistributor(character, component, num, "stat");
-                                break;
-
-                            case "plus":
-                                if(character.DistrPoints[0] > 0 && character.Stats[num] < 8 )
-                                {
-                                    character.AddLevelStat(num);
-                                }
-                                await messageStatDistributor(character, component, num, "stat");
-                                break;
-
-                            case "max":
-                                character.MaxStat(num);
-                                await messageStatDistributor(character, component, num, "stat");
-                                break;
-
-                            case "back":
-                                await messageStatDistributor(character, component, num == 0? 9 : num-1, "stat");
-                                break;
-
-                            case "next":
-                                await messageStatDistributor(character, component, num == 9? 0 : num+1, "stat");
-                                break;
-
                             case "confirm":
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;
@@ -253,52 +216,15 @@ namespace Nero
                     {
                         switch(action)
                         {
-                            case "minus":
-                                try{ character.AddLevelSkill(num, -1); }
-                                catch(Exception ex){
-                                    Console.WriteLine(ex.Message);
-                                    await messageStatDistributor(character, component, num, "skill");
-                                    break;
+                            case "add":
+                                int id = int.Parse(customID[2]);
+                                int[] range = new int[] {0,8};
+                                if(id == 6 || id == 9 || id == 14 || id == 9 || id == 19 || id == 25 || id == 26 || id == 32 || id == 33 || id == 48 || id == 53 || id == 55 || id == 56 || id == 60 || id == 63){
+                                    range[0] = 2;
                                 }
-                                await messageStatDistributor(character, component, num, "skill");
+                                character.DistributePoints(type, id, int.Parse(customID[3]), range);
+                                await messageStatDistributor(character, component, id, "skill");
                                 break;
-
-                            case "min":
-                                try{ character.MinSkill(num); }
-                                catch(Exception ex){
-                                    Console.WriteLine(ex.Message);
-                                    await messageStatDistributor(character, component, num, "skill");
-                                    break;
-                                }
-                                await messageStatDistributor(character, component, num, "skill");
-                                break;
-
-                            case "plus":
-                                if(character.DistrPoints[1] - character.Skills[num].Cost >= 0 && character.Skills[num].Level < 8 )
-                                {
-                                    character.AddLevelSkill(num);
-                                }
-                                await messageStatDistributor(character, component, num, "skill");
-                                break;
-
-                            case "max":
-                                try{ character.MaxSkill(num); }
-                                catch(Exception ex){
-                                    Console.WriteLine(ex.Message);
-                                    await messageStatDistributor(character, component, num, "skill");
-                                    break;
-                                }
-                                await messageStatDistributor(character, component, num, "skill");
-                                break;
-
-                            case "back":
-                                await messageStatDistributor(character, component, num == 1? 65 : num-1, "skill");
-                                break;
-
-                            case "next":
-                                await messageStatDistributor(character, component, num == 65? 1 : num+1, "skill");
-                                break;
-
                             case "confirm":
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;

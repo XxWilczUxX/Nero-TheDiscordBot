@@ -18,14 +18,35 @@ namespace Nero
             }
         }
 
-        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string type)
+        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string type, int sub = 0)
         {
 
             var names = new Nero.Names();
-
+            
             string name = type == "stat" ? names.stats[num] : names.skills[num-1];
             int? level = type == "stat" ? character.Stats[num] : character.Skills[num].Level;
             int? cost = type == "stat"? 1 : character.Skills[num].Cost;
+
+            switch(type) {
+                case "stat":
+                    name = names.stats[num];
+                    level = character.Stats[num];
+                    cost = 1;
+                    break;
+                case "skill":
+                    name = character.Skills[num].Name;
+                    level = character.Skills[num].Level;
+                    cost = character.Skills[num].Cost;
+                    break;
+                case "subskill":
+                    List<Skill>? subskills = character.Skills[num].SubSkills;
+                    if(subskills != null) {
+                        name = subskills.ElementAt(sub).Name;
+                        level = subskills.ElementAt(sub).Level;
+                        cost = subskills.ElementAt(sub).Cost;
+                    }
+                    break;
+            }
 
             var embed = new EmbedBuilder()
                 .WithTitle($"S{type.Substring(1)} Distribution")
@@ -68,11 +89,13 @@ namespace Nero
                 .WithCustomId($"{type}_moveVer_{num}_-1")
                 .WithLabel("\\/")
                 .WithStyle(ButtonStyle.Primary)
+                .WithDisabled(type == "stat"? true : character.Skills[num].SubSkills == null ? true : false)
             ;
             var buttonUp = new ButtonBuilder()
                 .WithCustomId($"{type}_moveVer_{num}_1")
                 .WithLabel("/\\")
                 .WithStyle(ButtonStyle.Primary)
+                .WithDisabled(type == "stat"? true : character.Skills[num].SubSkills == null ? true : false)
             ;
 
             var buttonConfirm = new ButtonBuilder()
@@ -269,6 +292,24 @@ namespace Nero
                                 await messageStatDistributor(character, component, 1, "skill");
                                 break;
                             
+                        }
+                    }
+                    else if(type == "subskill")
+                    {
+                        switch(action)
+                        {
+                            case "add": // this and vertical movement
+                                id = int.Parse(customID[2]);
+                                int[] range = new int[] {0,8};
+                                if(id == 19){
+                                    range[0] = 2;
+                                }
+                                character.DistributePoints(type, id, int.Parse(customID[3]), range);
+                                await messageStatDistributor(character, component, id, "skill");
+                                break;
+                            case "confirm":
+                                await messageStatDistributor(character, component, 1, "skill");
+                                break;
                         }
                     }
                 }

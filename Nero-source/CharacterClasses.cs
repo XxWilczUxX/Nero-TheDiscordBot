@@ -153,6 +153,8 @@ namespace Nero
                     }
                     break;
 
+                // subskill to add
+
             }
         }
 

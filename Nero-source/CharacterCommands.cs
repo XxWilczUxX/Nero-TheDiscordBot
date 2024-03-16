@@ -286,26 +286,29 @@ namespace Nero
                                 }
                                 if (character.Skills[pos[0]].SubSkills != null)
                                 {
-                                    
-                                    if (vec[1] != 0)
+                                    var subskills = character.Skills[pos[0]].SubSkills;
+                                    if(subskills != null)
                                     {
-                                        if (pos[1] + vec[1] < 0)
+                                        if (vec[1] != 0)
                                         {
-                                            pos[1] = character.Skills[pos[0]].SubSkills.Count - 1;
-                                        }
-                                        else if (pos[1] + vec[1] > character.Skills[pos[0]].SubSkills.Count)
-                                        {
-                                            pos[1] = 0;
-                                        }
-                                        else
-                                        {
-                                            pos[1] += vec[1];
+                                            if (pos[1] + vec[1] < 0)
+                                            {
+                                                pos[1] = subskills.Count - 1;
+                                            }
+                                            else if (pos[1] + vec[1] > subskills.Count)
+                                            {
+                                                pos[1] = 0;
+                                            }
+                                            else
+                                            {
+                                                pos[1] += vec[1];
+                                            }
                                         }
                                     }
                                 }
-
                                 await messageStatDistributor(character, component, "skill", pos);
                                 break;
+
 
                             case "add":
                                 int[] range = new int[] {0,8};

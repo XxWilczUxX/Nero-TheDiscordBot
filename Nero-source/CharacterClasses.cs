@@ -145,16 +145,19 @@ namespace Nero
                 case "skill":
                     if (pos[1] > 0)
                     {
-                        Skill? subSkill = this.Skills[pos[0]].SubSkills[pos[1]-1];
-                        if (subSkill != null)
-                        {
-                            num = DistrPtsChecks(subSkill.Level ?? 0, num, range, this.DistrPoints[1]);
-                            this.Skills[pos[0]].SubSkills[pos[1]-1].Level += num;
-                            this.DistrPoints[1] -= num * this.Skills[pos[0]].SubSkills[pos[1]-1].Cost ?? 1;
-                        }
-                        else
-                        {
-                            break;
+                        var subskills = this.Skills[pos[0]].SubSkills;
+                        if(subskills != null) {
+                            Skill? subSkill = subskills[pos[1]-1];
+                            if (subSkill != null)
+                            {
+                                num = DistrPtsChecks(subSkill.Level ?? 0, num, range, this.DistrPoints[1]);
+                                subskills[pos[1]-1].Level += num;
+                                this.DistrPoints[1] -= num * subskills[pos[1]-1].Cost ?? 1;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
                         
                     } else

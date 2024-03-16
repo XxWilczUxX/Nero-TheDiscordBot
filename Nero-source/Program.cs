@@ -131,7 +131,7 @@ namespace Nero
 
         private async Task ButtonHandler(SocketMessageComponent component)
         {
-            // Syntax: type_action_id_optional...
+            // Syntax: type_action_pos_num_optional...
             string type = component.Data.CustomId.Split("_").First();
             string action = component.Data.CustomId.Split("_").ToArray()[1];
             switch(type)
@@ -141,8 +141,7 @@ namespace Nero
                     switch(action)
                     {
                         case "add":
-                        case "moveHor":
-                        case "moveVer":
+                        case "move":
                         case "confirm":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);

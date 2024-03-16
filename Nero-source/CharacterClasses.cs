@@ -127,7 +127,7 @@ namespace Nero
             return num;
         }
 
-        public void DistributePoints(string type, int id, int num = 1, int[]? range = null)
+        public void DistributePoints(string type, int[] pos, int num = 1, int[]? range = null)
         {
             if(range == null)
             {
@@ -137,23 +137,33 @@ namespace Nero
             {
 
                 case "stat":
-                    num = DistrPtsChecks(this.Stats[id], num, range, this.DistrPoints[0]);
-                    this.Stats[id] += num;
+                    num = DistrPtsChecks(this.Stats[pos[0]], num, range, this.DistrPoints[0]);
+                    this.Stats[pos[0]] += num;
                     this.DistrPoints[0] -= num;
                     break;
 
                 case "skill":
-                    int? name = this.Skills[id].Level;
-                    int? cost = this.Skills[id].Cost;
-                    if(name != null && cost != null)
+                    if (pos[1] > 0)
                     {
-                        num = DistrPtsChecks((int)name, num, range, this.DistrPoints[1], (int)cost);
-                        this.Skills[id].Level += num;
-                        this.DistrPoints[1] -= num * (int)cost;
+                        Skill? subSkill = this.Skills[pos[0]].SubSkills[pos[1]-1];
+                        if (subSkill != null)
+                        {
+                            num = DistrPtsChecks(subSkill.Level ?? 0, num, range, this.DistrPoints[1]);
+                            this.Skills[pos[0]].SubSkills[pos[1]-1].Level += num;
+                            this.DistrPoints[1] -= num * this.Skills[pos[0]].SubSkills[pos[1]-1].Cost ?? 1;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        
+                    } else
+                    {
+                        num = DistrPtsChecks(this.Skills[pos[0]].Level ?? 0, num, range, this.DistrPoints[1], this.Skills[pos[0]].Cost ?? 1);
+                        this.Skills[pos[0]].Level += num;
+                        this.DistrPoints[1] -= num * this.Skills[pos[0]].Cost ?? 1;
                     }
                     break;
-
-                // subskill to add
 
             }
         }

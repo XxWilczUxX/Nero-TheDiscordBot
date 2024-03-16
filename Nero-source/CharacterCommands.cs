@@ -18,84 +18,81 @@ namespace Nero
             }
         }
 
-        async Task messageStatDistributor(Character character, SocketMessageComponent component, int num, string type, int sub = 0)
+        async Task messageStatDistributor(Character character, SocketMessageComponent component, string type, int[] pos)
         {
 
             var names = new Nero.Names();
+            var subskills = character.Skills[pos[0]].SubSkills;
+            var level = 0;
+            var cost = 1;
             
-            string name = type == "stat" ? names.stats[num] : names.skills[num-1];
-            int? level = type == "stat" ? character.Stats[num] : character.Skills[num].Level;
-            int? cost = type == "stat"? 1 : character.Skills[num].Cost;
-
-            switch(type) {
-                case "stat":
-                    name = names.stats[num];
-                    level = character.Stats[num];
-                    cost = 1;
-                    break;
-                case "skill":
-                    name = character.Skills[num].Name;
-                    level = character.Skills[num].Level;
-                    cost = character.Skills[num].Cost;
-                    break;
-                case "subskill":
-                    List<Skill>? subskills = character.Skills[num].SubSkills;
-                    if(subskills != null) {
-                        name = subskills.ElementAt(sub).Name;
-                        level = subskills.ElementAt(sub).Level;
-                        cost = subskills.ElementAt(sub).Cost;
-                    }
-                    break;
+            string name;
+            if (type == "stat")
+            {
+                name = names.stats[pos[0]];
+                level = character.Stats[pos[0]];
             }
+            else if (subskills != null && pos[1] > 0)
+            {
+                name = subskills[pos[1] - 1].Name;
+                level = subskills[pos[1] - 1]?.Level ?? 0;
+            }
+            else
+            {
+                name = character.Skills[pos[0]].Name;
+                level = character.Skills[pos[0]].Level ?? -1;
+                cost = character.Skills[pos[0]].Cost ?? 1;
+            }
+            
 
             var embed = new EmbedBuilder()
                 .WithTitle($"S{type.Substring(1)} Distribution")
                 .WithDescription($"Distribute {type} points.")
-                .AddField($"Current {type}: {name}", $"lvl: {level}\nCost: {cost}")
+                .AddField($"Current {type}: {name}", $"lvl: {(level == -1? "none" : level)}\nCost: {cost}")
                 .AddField("Available points:", character.DistrPoints[type == "stat"? 0 : 1])
             ;
             var buttonMinus = new ButtonBuilder()
-                .WithCustomId($"{type}_add_{num}_-1")
+                .WithCustomId($"{type}_add_{pos[0]}.{pos[1]}_-1")
                 .WithLabel("-1")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonPlus = new ButtonBuilder()
-                .WithCustomId($"{type}_add_{num}_1")
+                .WithCustomId($"{type}_add_{pos[0]}.{pos[1]}_1")
                 .WithLabel("+1")
                 .WithStyle(ButtonStyle.Success)
             ;
             var buttonMin = new ButtonBuilder()
-                .WithCustomId($"{type}_add_{num}_-8")
+                .WithCustomId($"{type}_add_{pos[0]}.{pos[1]}_-8")
                 .WithLabel("min")
                 .WithStyle(ButtonStyle.Danger)
             ;
             var buttonMax = new ButtonBuilder()
-                .WithCustomId($"{type}_add_{num}_8")
+                .WithCustomId($"{type}_add_{pos[0]}.{pos[1]}_8")
                 .WithLabel("max")
                 .WithStyle(ButtonStyle.Success)
             ;
 
             var buttonBack = new ButtonBuilder()
-                .WithCustomId($"{type}_moveHor_{num}_-1")
+                .WithCustomId($"{type}_move_{pos[0]}.{pos[1]}_-1.0")
                 .WithLabel("<")
                 .WithStyle(ButtonStyle.Primary)
             ;
             var buttonNext = new ButtonBuilder()
-                .WithCustomId($"{type}_moveHor_{num}_1")
+                .WithCustomId($"{type}_move_{pos[0]}.{pos[1]}_1.0")
                 .WithLabel(">")
                 .WithStyle(ButtonStyle.Primary)
             ;
             var buttonDown = new ButtonBuilder()
-                .WithCustomId($"{type}_moveVer_{num}_-1")
+                .WithCustomId($"{type}_move_{pos[0]}.{pos[1]}_0.-1")
                 .WithLabel("\\/")
                 .WithStyle(ButtonStyle.Primary)
-                .WithDisabled(type == "stat"? true : character.Skills[num].SubSkills == null ? true : false)
+                .WithDisabled(type == "stat"? true : subskills == null ? true : false)
             ;
             var buttonUp = new ButtonBuilder()
-                .WithCustomId($"{type}_moveVer_{num}_1")
+                .WithCustomId($"{type}_move_{pos[0]}.{pos[1]}_0.1")
                 .WithLabel("/\\")
                 .WithStyle(ButtonStyle.Primary)
-                .WithDisabled(type == "stat"? true : character.Skills[num].SubSkills == null ? true : false)
+                .WithDisabled(type == "stat"? true : subskills == null ? true : false)
             ;
 
             var buttonConfirm = new ButtonBuilder()
@@ -213,45 +210,54 @@ namespace Nero
                     int.TryParse(component.Data.Values.First(),out role);
                     character.SetRole(role, 4);
 
-                    await messageStatDistributor(character, component, 0, "stat");
+                    int[] pos = new int[] {0,0};
+
+                    await messageStatDistributor(character, component, "stat", pos);
                 }
                 else // buttons
                 {
                     string[] customID = component.Data.CustomId.Split("_").ToArray(); 
                     string type = customID[0];
                     string action = customID[1];
-                    int id;
+                    int[] pos = new int[] {0,0};
+                    if(customID.Length > 2){
+                        pos = customID[2].Split(".").Select(x => int.Parse(x)).ToArray();
+                    }
+
                     if(type == "stat")
                     {
+                        
                         switch(action)
                         {
 
-                            case "moveHor":
+                            case "move":
                                 
-                                id = int.Parse(customID[2]);
-                                int num = int.Parse(customID[3]);
-                                if(id + num < 0)
-                                {
-                                    id = 9;
+                                int[] vec = customID[3].Split(".").Select(x => int.Parse(x)).ToArray();
+                                if(vec[0] != 0) {
+                                    if(pos[0] + vec[0] < 0)
+                                    {
+                                        pos[0] = character.Stats.Length - 1;
+                                    }
+                                    else if(pos[0] + vec[0] > character.Stats.Length - 1)
+                                    {
+                                        pos[0] = 0;
+                                    }
+                                    else
+                                    {
+                                        pos[0] += vec[0];
+                                    }
                                 }
-                                else if(id + num > 9)
-                                {
-                                    id = 0;
-                                }
-                                else
-                                {
-                                    id += num;
-                                }
-                                await messageStatDistributor(character, component, id, "stat");
+
+                                await messageStatDistributor(character, component, "stat", pos);
                                 break;
 
                             case "add":
-                                id = int.Parse(customID[2]);
-                                character.DistributePoints(type, id, int.Parse(customID[3]), new int[] {2,8});
-                                await messageStatDistributor(character, component, id, "stat");
+                                character.DistributePoints(type, pos, int.Parse(customID[3]), new int[] {2,8});
+                                await messageStatDistributor(character, component, "stat", pos);
                                 break;
                             case "confirm":
-                                await messageStatDistributor(character, component, 1, "skill");
+                                pos = new int[] {0,0};
+                                await messageStatDistributor(character, component, "skill", pos );
                                 break;
                             
                         }
@@ -260,56 +266,59 @@ namespace Nero
                     {
                         switch(action)
                         {
-                            case "moveHor":
+                            case "move":
                                 
-                                id = int.Parse(customID[2]);
-                                int num = int.Parse(customID[3]);
-                                if(id + num < 1)
-                                {
-                                    id = 65;
+                                int[] vec = customID[3].Split(".").Select(x => int.Parse(x)).ToArray();
+                                if(vec[0] != 0) {
+                                    if(pos[0] + vec[0] < 0)
+                                    {
+                                        pos[0] = character.Skills.Length - 1;
+                                    }
+                                    else if(pos[0] + vec[0] > character.Skills.Length - 1)
+                                    {
+                                        pos[0] = 0;
+                                    }
+                                    else
+                                    {
+                                        pos[0] += vec[0];
+                                    }
+                                    pos[1] = 0;
                                 }
-                                else if(id + num > 65)
+                                if (character.Skills[pos[0]].SubSkills != null)
                                 {
-                                    id = 1;
+                                    
+                                    if (vec[1] != 0)
+                                    {
+                                        if (pos[1] + vec[1] < 0)
+                                        {
+                                            pos[1] = character.Skills[pos[0]].SubSkills.Count - 1;
+                                        }
+                                        else if (pos[1] + vec[1] > character.Skills[pos[0]].SubSkills.Count)
+                                        {
+                                            pos[1] = 0;
+                                        }
+                                        else
+                                        {
+                                            pos[1] += vec[1];
+                                        }
+                                    }
                                 }
-                                else
-                                {
-                                    id += num;
-                                }
-                                await messageStatDistributor(character, component, id, "skill");
+
+                                await messageStatDistributor(character, component, "skill", pos);
                                 break;
 
                             case "add":
-                                id = int.Parse(customID[2]);
                                 int[] range = new int[] {0,8};
-                                if(id == 6 || id == 9 || id == 14 || id == 9 || id == 19 || id == 25 || id == 26 || id == 32 || id == 33 || id == 48 || id == 53 || id == 55 || id == 56 || id == 60 || id == 63){
+                                if(pos[0] == 6 || pos[0] == 9 || (pos[0] == 14 && pos[1] == 1) || (pos[0] == 25 && pos[1] == 1) || pos[0] == 26 || pos[0] == 32 || pos[0] == 33 || pos[0] == 48 || pos[0] == 53 || pos[0] == 55 || pos[0] == 56 || pos[0] == 60 || pos[0] == 63){
                                     range[0] = 2;
                                 }
-                                character.DistributePoints(type, id, int.Parse(customID[3]), range);
-                                await messageStatDistributor(character, component, id, "skill");
+                                character.DistributePoints(type, pos, int.Parse(customID[3]), range);
+                                await messageStatDistributor(character, component, "skill", pos);
                                 break;
                             case "confirm":
-                                await messageStatDistributor(character, component, 1, "skill");
+                                await messageStatDistributor(character, component, "skill", pos);
                                 break;
                             
-                        }
-                    }
-                    else if(type == "subskill")
-                    {
-                        switch(action)
-                        {
-                            case "add": // this and vertical movement
-                                id = int.Parse(customID[2]);
-                                int[] range = new int[] {0,8};
-                                if(id == 19){
-                                    range[0] = 2;
-                                }
-                                character.DistributePoints(type, id, int.Parse(customID[3]), range);
-                                await messageStatDistributor(character, component, id, "skill");
-                                break;
-                            case "confirm":
-                                await messageStatDistributor(character, component, 1, "skill");
-                                break;
                         }
                     }
                 }

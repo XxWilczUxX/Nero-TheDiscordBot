@@ -95,6 +95,26 @@ namespace Nero
                 .WithDisabled(type == "stat"? true : subskills == null ? true : false)
             ;
 
+            var buttonNew = new ButtonBuilder()
+                .WithCustomId($"{type}_new_{pos[0]}.{pos[1]}")
+                .WithLabel("-------New------")
+                .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(type == "stat"? false : character.Skills[pos[0]].Level == null? false : true)
+            ;
+
+            var canRemove = true;
+            if(pos[1] > 1) {
+                if(pos[0] == 14 || pos[0] == 25) {
+                    canRemove = false;
+                }
+            }
+            var buttonRemove = new ButtonBuilder()
+                .WithCustomId($"{type}_remove_{pos[0]}.{pos[1]}")
+                .WithLabel("-----Remove-----")
+                .WithStyle(ButtonStyle.Secondary)
+                .WithDisabled(type == "stat"? false : canRemove)
+            ;
+
             var buttonConfirm = new ButtonBuilder()
                 .WithCustomId($"{type}_confirm")
                 .WithLabel("----------------- .Confirm. ----------------")
@@ -111,7 +131,9 @@ namespace Nero
                 .WithButton(buttonMinus,1)
                 .WithButton(buttonPlus,1)
                 .WithButton(buttonMax, 1)
-                .WithButton(buttonConfirm, 2)
+                .WithButton(buttonNew, 2)
+                .WithButton(buttonRemove, 2)
+                .WithButton(buttonConfirm, 3)
             ;
 
             File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );

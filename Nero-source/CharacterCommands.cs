@@ -210,7 +210,7 @@ namespace Nero
                     int.TryParse(component.Data.Values.First(),out role);
                     character.SetRole(role, 4);
 
-                    int[] pos = new int[] {0,0};
+                    int[] pos = new int[] {0,1};
 
                     await messageStatDistributor(character, component, "stat", pos);
                 }
@@ -270,13 +270,13 @@ namespace Nero
                                 
                                 int[] vec = customID[3].Split(".").Select(x => int.Parse(x)).ToArray();
                                 if(vec[0] != 0) {
-                                    if(pos[0] + vec[0] < 0)
+                                    if(pos[0] + vec[0] < 1)
                                     {
                                         pos[0] = character.Skills.Length - 1;
                                     }
                                     else if(pos[0] + vec[0] > character.Skills.Length - 1)
                                     {
-                                        pos[0] = 0;
+                                        pos[0] = 1;
                                     }
                                     else
                                     {

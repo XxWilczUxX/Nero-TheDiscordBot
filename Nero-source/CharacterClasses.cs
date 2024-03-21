@@ -10,7 +10,7 @@ namespace Nero
         public int Role {get; set;}
         public int[] Stats {get; set;} = new int[10];
         public Skill[] Skills {get; set;} = new Skill[66];
-        public int[] DistrPoints {get; set;} = new int[] {42, 58};
+        public int[] DistrPoints {get; set;} = new int[] {42, 58}; // stat , skill
         
         public Character(string name, string description)
         {
@@ -110,97 +110,64 @@ namespace Nero
             this.Skills[0] = new Skill(names.roles[1,this.Role], level);
         }
 
-        public void AddLevelStat(int stat, int num = 1)
+        private int DistrPtsChecks(int level, int num, int[] range, int distrPoints, int cost = 1)
         {
-            if((num > 0 && this.DistrPoints[0] == 0) || (num < 0 && this.Stats[stat] == 2))
+            if(distrPoints < (num < 0 ? (level + num >= range[0] ? num : range[0] - level) : (level + num <= range[1] ? num : range[1] - level)) * cost) // distribution poits range logic
             {
-                throw new ArgumentOutOfRangeException();
+                num = distrPoints / cost;
             }
-            else
+            else if(num < 0 && level + num < range[0]) // range logic
             {
-                this.Stats[stat] += num;
-                this.DistrPoints[0] -= num;
+                num = range[0] - level;
             }
+            else if(num > 0 && level + num > range[1]) // range logic
+            {
+                num = range[1] - level;
+            }
+            return num;
         }
 
-        public void AddLevelSkill(int skill, int num = 1)
+        public void DistributePoints(string type, int[] pos, int num = 1, int[]? range = null)
         {
-            if((num > 0 && this.DistrPoints[1] - this.Skills[skill].Cost < 0) || (num < 0 && this.Skills[skill].Level == 2 && ( skill == 6 || skill == 9 || skill == 14 || skill == 9 || skill == 19 || skill == 25 || skill == 26 || skill == 32 || skill == 33 || skill == 48 || skill == 53 || skill == 55 || skill == 56 || skill == 60 || skill == 63 )))
+            if(range == null)
             {
-                throw new ArgumentOutOfRangeException();
+                range = new int[] {0,int.MaxValue};
             }
-            
-            if(this.Skills[skill].Level != null)
+            switch(type)
             {
-                this.Skills[skill].Level += num;
-                int? cost = this.Skills[skill].Cost;
-                if(cost != null)
-                {
-                    this.DistrPoints[1] -= num * (int)cost;
-                }
-            }
-        }
 
-        public void MinStat(int stat)
-        {
-            int? level = this.Stats[stat];
-            this.DistrPoints[0] += (int)level- 2;
-            this.Stats[stat] = 2;
-        }
+                case "stat":
+                    num = DistrPtsChecks(this.Stats[pos[0]], num, range, this.DistrPoints[0]);
+                    this.Stats[pos[0]] += num;
+                    this.DistrPoints[0] -= num;
+                    break;
 
-        public void MaxStat(int stat)
-        {
-            int num = 8;
-            if(this.DistrPoints[0] < num - this.Stats[stat] )
-            {
-                num = this.DistrPoints[0];
-            }
-            int? level = this.Stats[stat];
-            this.DistrPoints[0] -= num;
-            this.Stats[stat] += num;
-        }
+                case "skill":
+                    if (pos[1] > 0)
+                    {
+                        var subskills = this.Skills[pos[0]].SubSkills;
+                        if(subskills != null) {
+                            Skill? subSkill = subskills[pos[1]-1];
+                            if (subSkill != null)
+                            {
+                                num = DistrPtsChecks(subSkill.Level ?? 0, num, range, this.DistrPoints[1]);
+                                subskills[pos[1]-1].Level += num;
+                                this.DistrPoints[1] -= num * subskills[pos[1]-1].Cost ?? 1;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        
+                    } else
+                    {
+                        num = DistrPtsChecks(this.Skills[pos[0]].Level ?? 0, num, range, this.DistrPoints[1], this.Skills[pos[0]].Cost ?? 1);
+                        this.Skills[pos[0]].Level += num;
+                        this.DistrPoints[1] -= num * this.Skills[pos[0]].Cost ?? 1;
+                    }
+                    break;
 
-        public void MinSkill(int skill)
-        {
-            if( skill == 6 || skill == 9 || skill == 14 || skill == 9 || skill == 19 || skill == 25 || skill == 26 || skill == 32 || skill == 33 || skill == 48 || skill == 53 || skill == 55 || skill == 56 || skill == 60 || skill == 63 )
-            {
-                int? cost = this.Skills[skill].Cost;
-                int? level = this.Skills[skill].Level;
-                if(cost != null && level != null)
-                {
-                    this.DistrPoints[1] += ((int)level- 2) * (int)cost;
-                    this.Skills[skill].Level = 2;
-                }
-            }
-            else
-            {
-                int? cost = this.Skills[skill].Cost;
-                int? level = this.Skills[skill].Level;
-                if(cost != null && level != null)
-                {
-                    this.DistrPoints[1] += (int)level * (int)cost;
-                    this.Skills[skill].Level = 0;
-                }
-            }
-        }
-
-        public void MaxSkill(int skill)
-        {
-            int? cost = this.Skills[skill].Cost;
-            int? level = this.Skills[skill].Level;
-            if(cost != null && level != null)
-            {
-                int num;
-                if((8 - (int)level) * (int)cost > this.DistrPoints[1])
-                {                        
-                    num = this.DistrPoints[1];    
-                }   
-                else
-                {
-                    num = 8;
-                }
-                this.DistrPoints[1] -= (num - (int)level) * (int)cost;
-                this.Skills[skill].Level = num;         
             }
         }
 
@@ -250,6 +217,14 @@ namespace Nero
                 this.SubSkills = new List<Skill>();
             }
             this.SubSkills.Add(subskill);
+        }
+
+        public void RemoveSubskill(int pos)
+        {
+            if(this.SubSkills != null)
+            {
+                this.SubSkills.RemoveAt(pos);
+            }
         }
 
     }

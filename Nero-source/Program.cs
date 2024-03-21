@@ -119,19 +119,20 @@ namespace Nero
         private async Task ModalHandler(SocketModal modal)
         {
 
-            switch(modal.Data.CustomId)
-            {
-                case "characterCreate_1":
-                    var comm = new Nero.CharacterCommands();
-                    await comm.CreationModalHandler(modal);
-                    break;
+            if (modal.Data.CustomId == "characterCreate_1") {
+                var comm = new Nero.CharacterCommands();
+                await comm.CreationModalHandler(modal);
+            }
+            else if(modal.Data.CustomId.Split("_").First() == "addSubskill") {
+                var comm = new Nero.CharacterCommands();
+                await comm.SubskillModalHandler(modal);
             }
 
         }
 
         private async Task ButtonHandler(SocketMessageComponent component)
         {
-            // Syntax: type_action_num
+            // Syntax: type_action_pos_num_optional...
             string type = component.Data.CustomId.Split("_").First();
             string action = component.Data.CustomId.Split("_").ToArray()[1];
             switch(type)
@@ -140,13 +141,11 @@ namespace Nero
                 case "skill":
                     switch(action)
                     {
-                        case "minus":
-                        case "plus":
-                        case "back":
-                        case "next":
+                        case "add":
+                        case "move":
                         case "confirm":
-                        case "min":
-                        case "max":
+                        case "new":
+                        case "remove":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);
                             break;

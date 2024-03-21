@@ -119,12 +119,13 @@ namespace Nero
         private async Task ModalHandler(SocketModal modal)
         {
 
-            switch(modal.Data.CustomId)
-            {
-                case "characterCreate_1":
-                    var comm = new Nero.CharacterCommands();
-                    await comm.CreationModalHandler(modal);
-                    break;
+            if (modal.Data.CustomId == "characterCreate_1") {
+                var comm = new Nero.CharacterCommands();
+                await comm.CreationModalHandler(modal);
+            }
+            else if(modal.Data.CustomId.Split("_").First() == "addSubskill") {
+                var comm = new Nero.CharacterCommands();
+                await comm.SubskillModalHandler(modal);
             }
 
         }
@@ -143,6 +144,8 @@ namespace Nero
                         case "add":
                         case "move":
                         case "confirm":
+                        case "new":
+                        case "remove":
                             var comm = new Nero.CharacterCommands();
                             await comm.StatDistributor(component);
                             break;

@@ -219,6 +219,14 @@ namespace Nero
             this.SubSkills.Add(subskill);
         }
 
+        public void RemoveSubskill(int pos)
+        {
+            if(this.SubSkills != null)
+            {
+                this.SubSkills.RemoveAt(pos);
+            }
+        }
+
     }
 
 }

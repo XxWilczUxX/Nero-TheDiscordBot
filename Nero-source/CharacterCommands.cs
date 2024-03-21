@@ -99,11 +99,14 @@ namespace Nero
                 .WithCustomId($"{type}_new_{pos[0]}.{pos[1]}")
                 .WithLabel("-------New------")
                 .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(type == "stat"? false : character.Skills[pos[0]].Level == null? false : true)
+                .WithDisabled(type == "stat"? true : character.Skills[pos[0]].Level == null? false : true)
             ;
 
             var canRemove = true;
-            if(pos[1] > 1) {
+            if(pos[1] == 0) {
+                canRemove = false;
+            }
+            else if(pos[1] == 1) {
                 if(pos[0] == 14 || pos[0] == 25) {
                     canRemove = false;
                 }
@@ -112,7 +115,7 @@ namespace Nero
                 .WithCustomId($"{type}_remove_{pos[0]}.{pos[1]}")
                 .WithLabel("-----Remove-----")
                 .WithStyle(ButtonStyle.Secondary)
-                .WithDisabled(type == "stat"? false : canRemove)
+                .WithDisabled(type == "stat"? true : !canRemove)
             ;
 
             var buttonConfirm = new ButtonBuilder()
@@ -212,6 +215,69 @@ namespace Nero
 
             await modal.RespondAsync(components: componentBuilder.Build(), ephemeral: true);
 
+        }
+
+        public async Task SubskillModalHandler(SocketModal modal) {
+            Character? character = JsonConvert.DeserializeObject<Character>( File.ReadAllText(Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json")) );
+            
+            if(character == null)
+            {   
+                var embeds = new Nero.Embeds();
+                await modal.RespondAsync(embed: embeds.Error("No character file in temp").Build());
+                throw new FileNotFoundException();
+            }
+            else {
+                string[] customID = new string[] {"",""};
+                if(modal.Data.CustomId.Length > 1){
+                    customID = modal.Data.CustomId.Split("_").ToArray();
+                }
+
+                int[] pos = new int[] {0,0};
+                if(customID.Length > 1){
+                    pos = customID[1].Split(".").Select(x => int.Parse(x)).ToArray();
+                }
+
+                character.Skills[pos[0]].AddSubskill(new Nero.Skill(modal.Data.Components.First().Value, 0));
+                File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
+                await modal.RespondAsync("Subskill added.", ephemeral: true); 
+
+            }
+        }
+
+        public async Task SubskillRemove(SocketMessageComponent component) {
+            Character? character = JsonConvert.DeserializeObject<Character>( File.ReadAllText(Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json")) );
+            
+            if(character == null)
+            {   
+                var embeds = new Nero.Embeds();
+                await component.RespondAsync(embed: embeds.Error("No character file in temp").Build());
+                throw new FileNotFoundException();
+            }
+            else {
+                
+                string[] customID = new string[] {"",""};
+                if(component.Data.CustomId.Length > 1){
+                    customID = component.Data.CustomId.Split("_").ToArray();
+                }
+
+                int[] pos = new int[] {0,0};
+                if(customID.Length > 2){
+                    pos = customID[2].Split(".").Select(x => int.Parse(x)).ToArray();
+                }
+
+                var subskills = character.Skills[pos[0]].SubSkills;
+
+                if(subskills != null) {
+                    character.DistrPoints[1] += subskills[pos[1] - 1].Level ?? 0;
+                    character.Skills[pos[0]].RemoveSubskill(pos[1] - 1);
+                    File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{component.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
+                    pos[1] -= 1;
+                    await messageStatDistributor(character, component, "skill", pos);
+                }
+                else {
+                    await component.RespondAsync("sexn't");
+                }
+            }
         }
 
         public async Task StatDistributor(SocketMessageComponent component)
@@ -344,6 +410,27 @@ namespace Nero
                                 await messageStatDistributor(character, component, "skill", pos);
                                 break;
                             
+                            case "new":
+                                var modal = new ModalBuilder()
+                                    .WithCustomId($"addSubskill_{pos[0]}.{pos[1]}")
+                                    .WithTitle($"Name of the new subskill.")
+                                    .AddTextInput(
+                                        new TextInputBuilder()
+                                        .WithCustomId("newSubskill")
+                                        .WithLabel("Name")
+                                        .WithRequired(true)
+                                        .WithMinLength(1)
+                                        .WithMaxLength(40)
+                                        .WithStyle(TextInputStyle.Short)
+                                        .WithPlaceholder("Name of the new subskill.")
+                                    )
+                                ;
+                                await component.RespondWithModalAsync(modal.Build());
+                                break;
+                            case "remove":
+                                await SubskillRemove(component);
+                                break;
+
                         }
                     }
                 }

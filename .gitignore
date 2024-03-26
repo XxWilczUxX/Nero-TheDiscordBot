@@ -483,5 +483,5 @@ safe.json
 
 # Just things that doesn't have to go on github
 
-\temp
-\json\characters\*.json
+Nero-source/temp
+Nero-source/json/characters/*.json

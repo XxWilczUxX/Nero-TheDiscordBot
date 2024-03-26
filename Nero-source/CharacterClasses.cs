@@ -11,6 +11,10 @@ namespace Nero
         public int[] Stats {get; set;} = new int[10];
         public Skill[] Skills {get; set;} = new Skill[66];
         public int[] DistrPoints {get; set;} = new int[] {42, 58}; // stat , skill
+        private int maxHp;
+        private int HP;
+        private int Humanity;
+        public string Equipement;
         
         public Character(string name, string description)
         {
@@ -20,6 +24,9 @@ namespace Nero
             for(int i = 0; i < Stats.Length; i++)
             {
                 this.Stats[i] = 2;
+                maxHp = 10 + 5 * (int)(Math.Ceiling((decimal)(Stats[5] + Stats[8])));
+                HP = maxHp;
+                Humanity = Stats[9] * 10;
             }
             
             int stat;

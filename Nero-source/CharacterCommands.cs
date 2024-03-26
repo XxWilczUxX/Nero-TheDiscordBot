@@ -232,16 +232,41 @@ namespace Nero
                     customID = modal.Data.CustomId.Split("_").ToArray();
                 }
 
-                int[] pos = new int[] {0,0};
-                if(customID.Length > 1){
-                    pos = customID[1].Split(".").Select(x => int.Parse(x)).ToArray();
+                if(customID[0] == "addSubskill") {
+                    int[] pos = new int[] {0,0};
+                    if(customID.Length > 1){
+                        pos = customID[1].Split(".").Select(x => int.Parse(x)).ToArray();
+                    }
+
+                    character.Skills[pos[0]].AddSubskill(new Nero.Skill(modal.Data.Components.First().Value, 0));
+                    File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
+                    await modal.RespondAsync("Subskill added.", ephemeral: true); 
+                }
+                else {
+                    character.Equipement = modal.Data.Components.First().Value;
+                    File.Delete( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json") );
+                    File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\json\\characters\\{modal.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
+                    await modal.RespondAsync($"Character {character.Name} was created.", ephemeral: true); 
                 }
 
-                character.Skills[pos[0]].AddSubskill(new Nero.Skill(modal.Data.Components.First().Value, 0));
-                File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), $"\\Nero-source\\temp\\characters\\{modal.User.Id}.json"), JsonConvert.SerializeObject(character, Formatting.Indented) );
-                await modal.RespondAsync("Subskill added.", ephemeral: true); 
-
             }
+        }
+
+        public async Task AskForEq(SocketMessageComponent component){
+            var descr = new TextInputBuilder()
+                .WithCustomId("descr")
+                .WithLabel("Description")
+                .WithRequired(true)
+                .WithMaxLength(4000)
+                .WithStyle(TextInputStyle.Paragraph)
+                .WithPlaceholder("A Equipment of this character.")
+            ;
+            var creationModal = new ModalBuilder()
+                .WithCustomId("help_me")
+                .WithTitle($"Equipement:")
+                .AddTextInput(descr)
+            ;
+            await component.RespondWithModalAsync(creationModal.Build());
         }
 
         public async Task SubskillRemove(SocketMessageComponent component) {
@@ -407,7 +432,7 @@ namespace Nero
                                 await messageStatDistributor(character, component, "skill", pos);
                                 break;
                             case "confirm":
-                                await messageStatDistributor(character, component, "skill", pos);
+                                await AskForEq(component);
                                 break;
                             
                             case "new":

@@ -123,7 +123,7 @@ namespace Nero
                 var comm = new Nero.CharacterCommands();
                 await comm.CreationModalHandler(modal);
             }
-            else if(modal.Data.CustomId.Split("_").First() == "addSubskill") {
+            else {
                 var comm = new Nero.CharacterCommands();
                 await comm.SubskillModalHandler(modal);
             }

@@ -78,7 +78,7 @@ namespace Nero
 
             var commandBuilders = new CommandBuilders();
 
-            var guildCommand = commandBuilders.Character;
+            var guildCommand = commandBuilders.Roll;
 
             try
             {

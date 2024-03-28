@@ -66,9 +66,7 @@ namespace Nero {
         public async Task ClientReady() {
 
             var guild = _client.GetGuild(info.BasementGuildID);
-
             var commandBuilders = new CommandBuilders();
-
             var guildCommand = commandBuilders.Roll;
 
             try {
@@ -96,6 +94,10 @@ namespace Nero {
                 case "roll":
                     var comm = new GeneralCommands();
                     await comm.Roll(command);
+                    break;
+                case "network":
+                    var net = new NetworkArchitectureCommands();
+                    await net.CommandHandler(command);
                     break;
             }
         }

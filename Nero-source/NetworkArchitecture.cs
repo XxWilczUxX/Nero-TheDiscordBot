@@ -1,5 +1,6 @@
 using System;
 using System.Net.NetworkInformation;
+using Discord.WebSocket;
 
 namespace Nero {
 
@@ -16,9 +17,21 @@ namespace Nero {
         public int NetrunnerInterfaceThatMightDie; 
 
     }
+
+    public class Floor {
+
+        private NetworkArchitecture NetworkArchitecture;
+        private Floor Left;
+        private Floor Right;
+
+
+    }
     public class NetworkArchitecture {
 
         private Difficulty Difficulty = new Difficulty(); 
+        private int Size = 0;
+        private int Branches = 0;
+        private Floor RootFloor = new Floor();
 
         public NetworkArchitecture(Difficulty.Level level) {
 
@@ -45,12 +58,51 @@ namespace Nero {
                     break;
             }
 
-            
+            Random random = new Random();
+
+            for(int i = 0; i < 3; i++) {
+                Size += random.Next(1, 7);
+            }
+
+            while(random.Next(1, 11) >= 7) {
+                Branches++;
+            }
             
         }
     }
+
+
+
     public class NetworkArchitectureCommands {
         
+        public async Task CommandHandler(SocketSlashCommand command) {
+
+            switch(command.Data.Options.First().Name) {
+                case "create":
+                    await CreateNetwork(command);
+                    break;
+                case "delete":
+                    await DeleteNetwork(command);
+                    break;
+                case "list":
+                    await ListNetworks(command);
+                    break;
+            }
+
+        }
+
+        public async Task CreateNetwork(SocketSlashCommand command) {
+            
+        }
+
+        public async Task DeleteNetwork(SocketSlashCommand command) {
+            
+        }
+
+        public async Task ListNetworks(SocketSlashCommand command) {
+            
+        }
+
     }
 
 }

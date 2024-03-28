@@ -20,10 +20,33 @@ namespace Nero {
 
     public class Floor {
 
-        private NetworkArchitecture NetworkArchitecture;
-        private Floor Left;
-        private Floor Right;
+        public Floor? Parent;
+        public Floor? Left;
+        public Floor? Right;
 
+        public Floor() {
+            Parent = null;
+            Left = null;
+            Right = null;
+        }
+
+        public Floor(Floor parent) {
+            Parent = parent;
+            Left = null;
+            Right = null;
+        }
+
+        public void AddNext() {
+            if(Left == null) {
+                Left = new Floor();
+            } 
+            else if(Right == null) {
+                Right = new Floor();
+            } 
+            else {
+                throw new Exception("Maximum branch limit reached. (2)");
+            }
+        }
 
     }
     public class NetworkArchitecture {
@@ -67,6 +90,26 @@ namespace Nero {
             while(random.Next(1, 11) >= 7) {
                 Branches++;
             }
+
+            Floor TargetFloor = RootFloor;
+
+            for(int i = 0; i < Size; i++) {
+                if(i == 0) {
+                    TargetFloor.AddNext();
+                    TargetFloor = TargetFloor.Left!;
+                }
+                else {
+                    TargetFloor.AddNext();
+                    TargetFloor = TargetFloor.Left!;
+                }
+
+            }
+            while(TargetFloor.Parent != null) {
+                TargetFloor = TargetFloor.Parent!;
+            }
+            RootFloor = TargetFloor;
+
+            
             
         }
     }

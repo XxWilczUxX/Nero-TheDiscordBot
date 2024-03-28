@@ -67,7 +67,7 @@ namespace Nero {
 
             var guild = _client.GetGuild(info.BasementGuildID);
             var commandBuilders = new CommandBuilders();
-            var guildCommand = commandBuilders.Roll;
+            var guildCommand = commandBuilders.Network;
 
             try {
                 await guild.CreateApplicationCommandAsync(guildCommand.Build());

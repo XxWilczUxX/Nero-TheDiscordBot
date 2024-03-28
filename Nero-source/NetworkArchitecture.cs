@@ -52,7 +52,7 @@ namespace Nero {
     public class NetworkArchitecture {
 
         private Difficulty Difficulty = new Difficulty(); 
-        private int Size = 0;
+        public int Size {get;}
         private int Branches = 0;
         private Floor RootFloor = new Floor();
 
@@ -109,7 +109,7 @@ namespace Nero {
             }
             RootFloor = TargetFloor;
 
-            
+
             
         }
     }
@@ -135,15 +135,17 @@ namespace Nero {
         }
 
         public async Task CreateNetwork(SocketSlashCommand command) {
-            
+            NetworkArchitecture network = new NetworkArchitecture(Difficulty.Level.Basic);
+
+            await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());
         }
 
         public async Task DeleteNetwork(SocketSlashCommand command) {
-            
+            await command.RespondAsync("Not implemented yet.");
         }
 
         public async Task ListNetworks(SocketSlashCommand command) {
-            
+            await command.RespondAsync("Not implemented yet.");
         }
 
     }

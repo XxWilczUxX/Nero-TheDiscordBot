@@ -64,6 +64,26 @@ namespace Nero
             )
         ;
 
+        public readonly SlashCommandBuilder Network = new SlashCommandBuilder()
+            .WithName("network")
+            .WithDescription("Network command tree")
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("create")
+                .WithDescription("Starts a network creation procedure.")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+            )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("delete")
+                .WithDescription("Deletes a network.")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+            )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("list")
+                .WithDescription("Lists out networks in the guild.")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+            )
+        ;
+
 
     }
 

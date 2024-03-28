@@ -28,6 +28,19 @@ namespace Nero
             return embed;
         }
 
+        public EmbedBuilder NetworkArchitecture(NetworkArchitecture network) {
+            var embed  = new EmbedBuilder()
+                .WithTitle("Network Architecture")
+                .WithDescription("Network Architecture")
+                .WithColor(Color.Blue);
+                
+            for(int i = 0; i < network.Size; i++) {
+                embed.AddField($"Floor {i+1}", "Floor");
+            }
+
+            return embed;
+        }
+
     }
 
 }

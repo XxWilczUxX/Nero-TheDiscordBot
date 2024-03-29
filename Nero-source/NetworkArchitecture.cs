@@ -23,25 +23,28 @@ namespace Nero {
         public Floor? Parent;
         public Floor? Left;
         public Floor? Right;
+        public int Height = 0;
 
         public Floor() {
             Parent = null;
+            Height = 0;
             Left = null;
             Right = null;
         }
 
         public Floor(Floor parent) {
             Parent = parent;
+            Height = parent.Height + 1;
             Left = null;
             Right = null;
         }
 
         public void AddNext() {
             if(Left == null) {
-                Left = new Floor();
+                Left = new Floor(this);
             } 
             else if(Right == null) {
-                Right = new Floor();
+                Right = new Floor(this);
             } 
             else {
                 throw new Exception("Maximum branch limit reached. (2)");
@@ -53,8 +56,8 @@ namespace Nero {
 
         private Difficulty Difficulty = new Difficulty(); 
         public int Size {get;}
-        private int Branches = 0;
-        private Floor RootFloor = new Floor();
+        public int Branches {get;}
+        public Floor RootFloor {get;}
 
         public NetworkArchitecture(Difficulty.Level level) {
 
@@ -91,27 +94,69 @@ namespace Nero {
                 Branches++;
             }
 
-            Floor TargetFloor = RootFloor;
+            RootFloor = new Floor();
 
-            for(int i = 0; i < Size; i++) {
-                if(i == 0) {
-                    TargetFloor.AddNext();
-                    TargetFloor = TargetFloor.Left!;
-                }
-                else {
-                    TargetFloor.AddNext();
-                    TargetFloor = TargetFloor.Left!;
-                }
+            int branchesLeft; // Assign a variable to the 'out' parameter
+            RootFloor = CreateBranch(RootFloor, Size, Branches, out branchesLeft);
 
-            }
-            while(TargetFloor.Parent != null) {
-                TargetFloor = TargetFloor.Parent!;
-            }
-            RootFloor = TargetFloor;
-
-
+            RootFloor = ReturnToHeight(RootFloor, 0);
             
         }
+
+        private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) {
+            
+            Random random = new Random();
+
+            if(isBranch? floor.Height < maxHeight-1 : floor.Height < maxHeight) {
+                floor.AddNext();
+                CreateBranch(floor.Left!, maxHeight, maxBranches, out branchesLeft);
+                if(random.Next(1, 3) != 1 && branchesLeft > 0) {
+                    floor.AddNext();
+                    branchesLeft--;;
+                    CreateBranch(floor.Right!, maxHeight, branchesLeft, out branchesLeft, true);
+                }
+            } else {
+                branchesLeft = maxBranches;
+            }
+
+            return floor;
+        }
+
+        private Floor ReturnToHeight(Floor floor, int height) {
+            while(floor.Height != height) {
+                floor = floor.Parent!;
+            }
+            return floor;
+        }
+
+        public void PreorderConsole(Floor floor) {
+            if(floor == null) {
+                return;
+            }
+            else {
+                Console.Write(floor.Height + " ");
+                PreorderConsole(floor.Left);
+                PreorderConsole(floor.Right);
+            }
+        }
+
+        public List<Floor>[] PreorderList(List<Floor>[] floors, Floor floor) {
+            
+            if(floor == null) {
+                return floors;
+            }
+            else if(floor.Height < floors.Length) {
+                if(floors[floor.Height] == null) {
+                    floors[floor.Height] = new List<Floor>();
+                }
+                floors[floor.Height].Add(floor);
+                floors = PreorderList(floors, floor.Left);
+                floors = PreorderList(floors, floor.Right);
+            }
+
+            return floors;
+        }
+
     }
 
 
@@ -137,7 +182,10 @@ namespace Nero {
         public async Task CreateNetwork(SocketSlashCommand command) {
             NetworkArchitecture network = new NetworkArchitecture(Difficulty.Level.Basic);
 
-            await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());
+            Console.WriteLine("\n" + network.Size + "\n" + network.Branches);
+            network.PreorderConsole(network.RootFloor);
+            await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
+            //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());
         }
 
         public async Task DeleteNetwork(SocketSlashCommand command) {

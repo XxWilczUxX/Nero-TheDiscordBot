@@ -109,8 +109,8 @@ namespace Nero {
 
             if(isBranch? floor.Height < maxHeight-1 : floor.Height < maxHeight) {
                 floor.AddNext();
-                CreateBranch(floor.Left!, maxHeight, maxBranches, out branchesLeft);
-                if(random.Next(1, 3) != 1 && branchesLeft > 0) {
+                CreateBranch(floor.Left!, maxHeight, maxBranches, out branchesLeft, isBranch);
+                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-1) {
                     floor.AddNext();
                     branchesLeft--;;
                     CreateBranch(floor.Right!, maxHeight, branchesLeft, out branchesLeft, true);

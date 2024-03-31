@@ -6,11 +6,12 @@ namespace Nero {
 
     public class Difficulty {
         
-        public enum Level {
+        public enum Level : ushort{
             Basic,
             Standard,
             Uncommon,
-            Advanced
+            Advanced,
+            Unset
         }
         public int SecurityDV;
         public int NetrunnerInterface;
@@ -59,7 +60,7 @@ namespace Nero {
         public int Branches {get;}
         public Floor RootFloor {get;}
 
-        public NetworkArchitecture(Difficulty.Level level) {
+        public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0) {
 
             switch (level) {
                 case Difficulty.Level.Basic:
@@ -86,14 +87,20 @@ namespace Nero {
 
             Random random = new Random();
 
-            for(int i = 0; i < 3; i++) {
-                Size += random.Next(1, 7);
-            }
+            this.Size = size;
+            this.Branches = branches;
 
-            while(random.Next(1, 11) >= 7) {
-                Branches++;
+            if(Size == 0){
+                for(int i = 0; i < 3; i++) {
+                    Size += random.Next(1, 7);
+                }
             }
-
+            
+            if(Branches == 0){                
+                while(random.Next(1, 11) >= 7) {
+                    Branches++;
+                }
+            }
             RootFloor = new Floor();
 
             int branchesLeft; // Assign a variable to the 'out' parameter
@@ -103,11 +110,21 @@ namespace Nero {
             
         }
 
+
+
         private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) {
             
             Random random = new Random();
 
             if(isBranch? floor.Height < maxHeight-1 : floor.Height < maxHeight) {
+                
+                if(isBranch) {
+                    if(random.Next(1, 3) == 1) {
+                        branchesLeft = maxBranches;
+                        return floor;
+                    }
+                }
+
                 floor.AddNext();
                 CreateBranch(floor.Left!, maxHeight, maxBranches, out branchesLeft, isBranch);
                 if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-1) {
@@ -115,6 +132,8 @@ namespace Nero {
                     branchesLeft--;;
                     CreateBranch(floor.Right!, maxHeight, branchesLeft, out branchesLeft, true);
                 }
+
+
             } else {
                 branchesLeft = maxBranches;
             }
@@ -180,10 +199,35 @@ namespace Nero {
         }
 
         public async Task CreateNetwork(SocketSlashCommand command) {
-            NetworkArchitecture network = new NetworkArchitecture(Difficulty.Level.Basic);
+            
+            var options = command.Data.Options.First().Options.ToArray();
 
-            Console.WriteLine("\n" + network.Size + "\n" + network.Branches);
+            Difficulty.Level level = Difficulty.Level.Unset;
+            int size = 0;
+            int branches = 0;
+
+            for(int i = 0; i < options.Length; i++) {
+                if(options[i].Name == "difficulty") {
+                    level = (Difficulty.Level)(ushort)(long)options[i].Value;
+                }
+                else if(options[i].Name == "size") {
+                    size = Convert.ToInt32(options[i].Value);
+                }
+                else if(options[i].Name == "branches") {
+                    branches = Convert.ToInt32(options[i].Value);
+                }
+            }
+
+            if(level == Difficulty.Level.Unset) {
+                level = (Difficulty.Level)new Random().Next(0, 4);
+            }
+
+            NetworkArchitecture network = new NetworkArchitecture(level, size, branches);
+
+            Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
             network.PreorderConsole(network.RootFloor);
+            Console.WriteLine("\n");
+
             await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
             //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());
         }

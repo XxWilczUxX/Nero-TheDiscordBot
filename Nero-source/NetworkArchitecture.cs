@@ -1,6 +1,7 @@
 using System;
 using System.Net.NetworkInformation;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 
 namespace Nero {
 
@@ -19,40 +20,79 @@ namespace Nero {
 
     }
 
-    public class Floor {
-
+    public class Floor : INavigation {
+        
         public Floor? Parent;
-        public Floor? Left;
-        public Floor? Right;
+        public Floor? Child;
+        public Floor? Branch;
+
         public int Height = 0;
 
         public Floor() {
             Parent = null;
-            Height = 0;
-            Left = null;
-            Right = null;
+            Child = null;
+            Branch = null;
         }
 
         public Floor(Floor parent) {
             Parent = parent;
             Height = parent.Height + 1;
-            Left = null;
-            Right = null;
+            Child = null;
+            Branch = null;
         }
 
         public void AddNext() {
-            if(Left == null) {
-                Left = new Floor(this);
+            if(Child == null) {
+                Child = new Floor(this);
             } 
-            else if(Right == null) {
-                Right = new Floor(this);
+            else if(Branch == null) {
+                Branch = new Floor(this);
             } 
             else {
                 throw new Exception("Maximum branch limit reached. (2)");
             }
+        
+        }
+
+        public object Up() {
+            if(Parent != null) {
+                return Parent;
+            }
+            else {
+                return this;
+            }
+        
+        }
+
+        public object Down() {
+            if(Child != null) {
+                return Child;
+            }
+            else {
+                return this;
+            }
+        }
+
+        public object Right() {
+            if(Branch != null) {
+                return Branch;
+            }
+            else {
+                return this;
+            }
+        }
+
+        public object Left() {
+            if(Branch != null) {
+                return Branch;
+            }
+            else {
+                return this;
+            }
         }
 
     }
+
     public class NetworkArchitecture {
 
         private Difficulty Difficulty = new Difficulty(); 
@@ -112,7 +152,7 @@ namespace Nero {
 
 
 
-        private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) {
+        private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) { //This doesn't work for creating side branches. It only works for creating the main branch. 
             
             Random random = new Random();
 
@@ -126,11 +166,16 @@ namespace Nero {
                 }
 
                 floor.AddNext();
-                CreateBranch(floor.Left!, maxHeight, maxBranches, out branchesLeft, isBranch);
-                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-1) {
+                if((Floor)floor.Down() != floor) {
+                    CreateBranch((Floor)floor.Down(), maxHeight, maxBranches, out branchesLeft, isBranch);
+                }
+                else {
+                    branchesLeft = maxBranches;
+                }
+                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-1 && (Floor)floor.Right() != floor) {
                     floor.AddNext();
                     branchesLeft--;;
-                    CreateBranch(floor.Right!, maxHeight, branchesLeft, out branchesLeft, true);
+                    CreateBranch((Floor)floor.Right(), maxHeight, branchesLeft, out branchesLeft, true);
                 }
 
 
@@ -149,28 +194,36 @@ namespace Nero {
         }
 
         public void PreorderConsole(Floor floor) {
-            if(floor == null) {
-                return;
+            Console.WriteLine(floor.Height);
+
+            if((Floor)floor.Down() != floor) {
+                PreorderConsole((Floor)floor.Down());
             }
-            else {
-                Console.Write(floor.Height + " ");
-                PreorderConsole(floor.Left);
-                PreorderConsole(floor.Right);
+            if((Floor)floor.Right() != floor) {
+                PreorderConsole((Floor)floor.Right());
             }
+            return;
+            
         }
 
         public List<Floor>[] PreorderList(List<Floor>[] floors, Floor floor) {
-            
-            if(floor == null) {
+
+            if((Floor)floor.Down() == floor || (Floor)floor.Right() == floor) {
                 return floors;
             }
-            else if(floor.Height < floors.Length) {
+            else if(floor.Height < floors.Length){
+
                 if(floors[floor.Height] == null) {
                     floors[floor.Height] = new List<Floor>();
                 }
                 floors[floor.Height].Add(floor);
-                floors = PreorderList(floors, floor.Left);
-                floors = PreorderList(floors, floor.Right);
+                if((Floor)floor.Down() != floor) {
+                    floors = PreorderList(floors, (Floor)floor.Down());
+                }
+                if((Floor)floor.Right() != floor) {
+                    floors = PreorderList(floors, (Floor)floor.Right());
+                }
+
             }
 
             return floors;
@@ -227,6 +280,13 @@ namespace Nero {
             Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
             network.PreorderConsole(network.RootFloor);
             Console.WriteLine("\n");
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), "Nero-source\\temp\\architectures\\network.json") , JsonConvert.SerializeObject(network, Formatting.Indented, settings: settings));
 
             await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
             //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());

@@ -91,14 +91,20 @@ namespace Nero {
             }
         }
 
+        public string GetContents() {
+
+            return $"{Height}";
+        
+        }
+
     }
 
-    public class NetworkArchitecture {
+    public class NetworkArchitecture : Saveable{
 
         private Difficulty Difficulty = new Difficulty(); 
-        public int Size {get;}
-        public int Branches {get;}
-        public Floor RootFloor {get;}
+        public int Size {get; set;}
+        public int Branches {get; set;}
+        public Floor RootFloor {get; set;}
 
         public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0) {
 
@@ -147,16 +153,17 @@ namespace Nero {
             RootFloor = CreateBranch(RootFloor, Size, Branches, out branchesLeft);
 
             RootFloor = ReturnToHeight(RootFloor, 0);
+
+            
             
         }
-
 
 
         private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) { //This doesn't work for creating side branches. It only works for creating the main branch. 
             
             Random random = new Random();
 
-            if(isBranch? floor.Height < maxHeight-1 : floor.Height < maxHeight) {
+            if(isBranch? floor.Height < maxHeight-2 : floor.Height < maxHeight-1) {
                 
                 if(isBranch) {
                     if(random.Next(1, 3) == 1) {
@@ -172,7 +179,7 @@ namespace Nero {
                 else {
                     branchesLeft = maxBranches;
                 }
-                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-1 && (Floor)floor.Right() != floor) {
+                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-2 && (Floor)floor.Right() != floor) {
                     floor.AddNext();
                     branchesLeft--;;
                     CreateBranch((Floor)floor.Right(), maxHeight, branchesLeft, out branchesLeft, true);
@@ -227,6 +234,59 @@ namespace Nero {
             }
 
             return floors;
+        }
+
+
+
+        public void Save(string guildID, string clientID, bool isTemp = false) {
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented
+            };
+
+            string json = JsonConvert.SerializeObject(this, settings);
+            string path;
+
+            if(isTemp) {
+                path =  Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\temp\\{guildID}\\architectures");
+            }
+            else {
+                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\json\\{guildID}\\architectures");
+            }
+
+            Directory.CreateDirectory(path);
+            File.WriteAllText($"{path}\\{clientID}.json", json);
+        }
+
+        public void Load(string guildID, string clientID, bool isTemp = false) {
+
+            NetworkArchitecture loaded = new NetworkArchitecture(Difficulty.Level.Unset);
+            string path;
+
+            if (isTemp) {
+                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\temp\\{guildID}\\architectures\\{clientID}.json");
+            }
+            else {
+                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\json\\{guildID}\\architectures\\{clientID}.json");
+            }
+            if(File.Exists(path)) {
+                loaded = JsonConvert.DeserializeObject<NetworkArchitecture>(File.ReadAllText(path))!;
+            }
+            else {
+                throw new Exception("File not found.");
+            }
+
+            Difficulty loadedDifficulty = loaded.Difficulty;
+            int loadedSize = loaded.Size;
+            int loadedBranches = loaded.Branches;
+            Floor loadedRootFloor = loaded.RootFloor;
+
+            this.Difficulty = loadedDifficulty;
+            this.Size = loadedSize;
+            this.Branches = loadedBranches;
+            this.RootFloor = loadedRootFloor;
         }
 
     }
@@ -286,7 +346,7 @@ namespace Nero {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
-            File.WriteAllText( Path.Join(Directory.GetCurrentDirectory(), "Nero-source\\temp\\architectures\\network.json") , JsonConvert.SerializeObject(network, Formatting.Indented, settings: settings));
+            network.Save(command.GuildId.ToString()?? "0", command.User.Id.ToString(), true);
 
             await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
             //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());

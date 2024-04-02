@@ -3,10 +3,17 @@ using System;
 namespace Nero {
 
     public interface INavigation {
-        public abstract object Right();
-        public abstract object Left();
-        public abstract object Up();
-        public abstract object Down();
+        public object Right();
+        public object Left();
+        public object Up();
+        public object Down();
+
+        public string GetContents();
+    }
+
+    public interface Saveable {
+        public void Save(string guildID, string clientID, bool isTemp = false);
+        public void Load(string guildID, string clientID, bool isTemp = false);
     }
 
 }

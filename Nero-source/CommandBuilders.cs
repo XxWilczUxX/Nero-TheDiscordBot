@@ -36,6 +36,11 @@ namespace Nero
                     .AddChoice("global", 1)
                 )
             )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("shutdown")
+                .WithDescription("Shuts down the bot, can only be used by set user")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+            )
         ;
 
         public readonly SlashCommandBuilder Character = new SlashCommandBuilder()

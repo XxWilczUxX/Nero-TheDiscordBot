@@ -33,6 +33,17 @@ namespace Nero
                             break;
                     }
                     break;
+                case "shutdown":
+                    var info = new Info();
+                    if(command.User.Id == info.HeadAdminID) {
+                        await command.RespondAsync("Shutting down...");
+                        await _client.SetCustomStatusAsync("shutting down");
+                        await _client.StopAsync();
+                        await _client.LogoutAsync();
+                        _client.Dispose();
+                        Environment.Exit(0);
+                    }
+                    break;
                 //
             }
         }

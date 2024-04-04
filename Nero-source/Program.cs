@@ -10,6 +10,7 @@ namespace Nero
     {
         public string Token { get; set; } = string.Empty;
         public ulong BasementGuildID { get; set; }
+        public ulong HeadAdminID { get; set; }
     }
 
     public class Names

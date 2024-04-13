@@ -280,41 +280,53 @@ namespace Nero {
 
         public async Task CreateNetwork(SocketSlashCommand command) {
             
-            var options = command.Data.Options.First().Options.ToArray();
+            
+            try {
+                // Try to load the network from temp folder
 
-            Difficulty.Level level = Difficulty.Level.Unset;
-            int size = 0;
-            int branches = 0;
-
-            for(int i = 0; i < options.Length; i++) {
-                if(options[i].Name == "difficulty") {
-                    level = (Difficulty.Level)(ushort)(long)options[i].Value;
-                }
-                else if(options[i].Name == "size") {
-                    size = Convert.ToInt32(options[i].Value);
-                }
-                else if(options[i].Name == "branches") {
-                    branches = Convert.ToInt32(options[i].Value);
-                }
+                SaveableFactory.LoadTemp((ulong)command.GuildId!, command.User.Id);
+                
             }
+            catch {
+                // Create the network
 
-            if(level == Difficulty.Level.Unset) {
-                level = (Difficulty.Level)new Random().Next(0, 4);
+                var options = command.Data.Options.First().Options.ToArray();
+
+                Difficulty.Level level = Difficulty.Level.Unset;
+                int size = 0;
+                int branches = 0;
+
+                for(int i = 0; i < options.Length; i++) {
+                    if(options[i].Name == "difficulty") {
+                        level = (Difficulty.Level)(ushort)(long)options[i].Value;
+                    }
+                    else if(options[i].Name == "size") {
+                        size = Convert.ToInt32(options[i].Value);
+                    }
+                    else if(options[i].Name == "branches") {
+                        branches = Convert.ToInt32(options[i].Value);
+                    }
+                }
+
+                if(level == Difficulty.Level.Unset) {
+                    level = (Difficulty.Level)new Random().Next(0, 4);
+                }
+
+                NetworkArchitecture network = new NetworkArchitecture(level, size, branches, (ulong)command.GuildId!);
+
+                Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
+                network.PreorderConsole((network.Navigation as Floor)!);
+                Console.WriteLine("\n");
+
+                var settings = new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                };
             }
+            finally {
+                await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
+            }   
 
-            NetworkArchitecture network = new NetworkArchitecture(level, size, branches, (ulong)command.GuildId!);
-
-            Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
-            network.PreorderConsole((network.Navigation as Floor)!);
-            Console.WriteLine("\n");
-
-            var settings = new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-
-            await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
-            //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());
         }
 
         public async Task DeleteNetwork(SocketSlashCommand command) {

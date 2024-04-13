@@ -101,12 +101,32 @@ namespace Nero {
 
     public class NetworkArchitecture : Saveable{
 
+        public ulong ID {get; set;}
+        public string Type {get;} = "NetworkArchitecture";
+        public INavigation Navigation {get; set;}
         private Difficulty Difficulty = new Difficulty(); 
         public int Size {get; set;}
         public int Branches {get; set;}
-        public INavigation Navigation {get; set;}
 
-        public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0) {
+        private ulong DetermineID(ulong guildID) {
+            var path =  Path.Combine(Directory.GetCurrentDirectory(), ($"json\\guilds\\{guildID}\\{Type}"));
+            ulong ID = 0;
+            if(Path.Exists(path)) {
+                
+                var files = Directory.GetFiles(path);
+                foreach(var file in files) {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    if (ulong.TryParse(fileName, out ulong result))
+                    {
+                        ID = Math.Max(ID, result+1);
+                    }
+                }
+
+            }
+            return ID;
+        }
+
+        public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0, ulong guildID = 0) {
 
             switch (level) {
                 case Difficulty.Level.Basic:
@@ -154,7 +174,7 @@ namespace Nero {
 
             Navigation = ReturnToHeight((Floor)Navigation, 0);
 
-            
+            this.ID = DetermineID(guildID);
             
         }
 
@@ -236,62 +256,6 @@ namespace Nero {
             return floors;
         }
 
-
-
-        public void Save(ulong guildID, ulong clientID, bool isTemp = false) {
-
-            var settings = new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented
-            };
-
-            string json = JsonConvert.SerializeObject(this, settings);
-            string path;
-
-            if(isTemp) {
-                path =  Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\temp\\{guildID}");
-            }
-            else {
-                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\json\\{guildID}\\architectures");
-                this.Navigation = ReturnToHeight((this.Navigation as Floor)!, 0);
-            }
-
-            Directory.CreateDirectory(path);
-            File.WriteAllText($"{path}\\{clientID}.json", json);
-        }
-
-        public void Load(ulong guildID, ulong clientID, bool isTemp = false) {
-
-            NetworkArchitecture loaded = new NetworkArchitecture(Difficulty.Level.Unset);
-            string path;
-
-            if (isTemp) {
-                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\temp\\{guildID}\\{clientID}.json");
-            }
-            else {
-                path = Path.Join(Directory.GetCurrentDirectory(), $"Nero-source\\json\\{guildID}\\architectures\\{clientID}.json");
-            }
-            if (File.Exists(path))
-            {
-                loaded = JsonConvert.DeserializeObject<NetworkArchitecture>(File.ReadAllText(path))!;
-            }
-            else
-            {
-                throw new Exception("File not found.");
-            }
-
-            Difficulty loadedDifficulty = loaded.Difficulty;
-            int loadedSize = loaded.Size;
-            int loadedBranches = loaded.Branches;
-            Floor loadedNavigation = (loaded.Navigation as Floor)!;
-
-            this.Difficulty = loadedDifficulty;
-            this.Size = loadedSize;
-            this.Branches = loadedBranches;
-            this.Navigation = loadedNavigation;
-        }
-
     }
 
 
@@ -338,7 +302,7 @@ namespace Nero {
                 level = (Difficulty.Level)new Random().Next(0, 4);
             }
 
-            NetworkArchitecture network = new NetworkArchitecture(level, size, branches);
+            NetworkArchitecture network = new NetworkArchitecture(level, size, branches, (ulong)command.GuildId!);
 
             Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
             network.PreorderConsole((network.Navigation as Floor)!);
@@ -348,8 +312,6 @@ namespace Nero {
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-
-            network.Save(command.GuildId?? (ulong)0, command.User.Id, true);
 
             await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
             //await command.RespondAsync(embed: new Embeds().NetworkArchitecture(network).Build());

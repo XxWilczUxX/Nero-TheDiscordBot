@@ -15,33 +15,19 @@ namespace Nero {
     }
 
     public interface Saveable {
+        public ulong ID { get; set; }
+        public string Type { get; }
         public INavigation Navigation { get; set; }
-        public void Save(ulong guildID, ulong clientID, bool isTemp = false);
-        public void Load(ulong guildID, ulong clientID, bool isTemp = false);
     }
 
     
     public static class SaveableFactory {
-        public static Saveable Load(ulong guildID, ulong clientID) {
-            if(File.Exists($"temp\\{guildID}\\{clientID}.json")) {
-                var json = File.ReadAllText($"temp\\{guildID}\\{clientID}.json");
-                var saveable = JsonConvert.DeserializeObject<Saveable>(json);
-                if (saveable != null)
-                {
-                    return saveable;
-                }
-            }
+        public static void Save(Saveable saveable) {
+            var path = $"./saves/{saveable.Type}.json";
 
-            if(File.Exists($"json\\guilds\\{guildID}\\networks\\{clientID}.json")) { // Note to myself: im dumb and i have to remake save and load methods and overall redesign saving system
-                var json = File.ReadAllText($"data/{guildID}/{clientID}.json");
-                var saveable = JsonConvert.DeserializeObject<Saveable>(json);
-                if (saveable != null)
-                {
-                    return saveable;
-                }
-            }
-
-            return null;
+            
+            var json = JsonConvert.SerializeObject(saveable);
+            Console.WriteLine(json);
         }
     }
 
@@ -50,8 +36,6 @@ namespace Nero {
 
         public async Task NavigationHandler(SocketMessageComponent component) {
             
-            var customID = component.Data.CustomId.Split("_");
-
             
             
         }

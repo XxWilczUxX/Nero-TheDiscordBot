@@ -93,7 +93,7 @@ namespace Nero {
 
         public string GetContents() {
 
-            return $"{Height}";
+            return $"Floor:{Height}-Contains:Nothing";
         
         }
 
@@ -280,11 +280,11 @@ namespace Nero {
 
         public async Task CreateNetwork(SocketSlashCommand command) {
             
+            NetworkArchitecture network = new NetworkArchitecture(Difficulty.Level.Unset);
             
             try {
                 // Try to load the network from temp folder
-
-                SaveableFactory.LoadTemp((ulong)command.GuildId!, command.User.Id);
+                network = (NetworkArchitecture)SaveableFactory.LoadTemp((ulong)command.GuildId!, command.User.Id);
                 
             }
             catch {
@@ -312,7 +312,7 @@ namespace Nero {
                     level = (Difficulty.Level)new Random().Next(0, 4);
                 }
 
-                NetworkArchitecture network = new NetworkArchitecture(level, size, branches, (ulong)command.GuildId!);
+                network = new NetworkArchitecture(level, size, branches, (ulong)command.GuildId!);
 
                 Console.WriteLine($"Network Created: {level} {network.Size} {network.Branches}");
                 network.PreorderConsole((network.Navigation as Floor)!);
@@ -324,7 +324,8 @@ namespace Nero {
                 };
             }
             finally {
-                await command.RespondAsync("Network Created but i don't have a idea how to display it. (Not implemented yet.)");
+                var navigationActions = new NavigationActions();
+                await navigationActions.Respond(command, network.Navigation);
             }   
 
         }

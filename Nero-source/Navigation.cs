@@ -74,7 +74,7 @@ namespace Nero {
     }
 
 
-    public class Actions { // Maybe i can make a inherited class from Saveable, so i don't fuck up the interface idk...
+    public class NavigationActions { // Maybe i can make a inherited class from Saveable, so i don't fuck up the interface idk...
 
         public async Task NavigationHandler(SocketMessageComponent component) {
             
@@ -82,14 +82,40 @@ namespace Nero {
             
         }
 
-        public async Task CreateComponent(INavigation content, string type) {
+        public static ComponentBuilder CreateComponent(INavigation content) {
 
             var builder = new ComponentBuilder()
-                .WithButton("Left", $"nav_left_{type}", ButtonStyle.Primary)
-                .WithButton("Right", $"nav_right_{type}", ButtonStyle.Primary)
-                .WithButton("Up", $"nav_up_{type}", ButtonStyle.Primary)
-                .WithButton("Down", $"nav_down_{type}", ButtonStyle.Primary)
+                .WithButton("Left", $"nav_left", ButtonStyle.Primary, disabled: content.Left()!=content)
+                .WithButton("Right", $"nav_right", ButtonStyle.Primary, disabled: content.Right()!=content)
+                .WithButton("Up", $"nav_up", ButtonStyle.Primary, disabled: content.Up()!=content)
+                .WithButton("Down", $"nav_down", ButtonStyle.Primary, disabled: content.Down()!=content)
             ;
+
+            return builder;
+        }
+
+        public async Task Respond(SocketMessageComponent component, INavigation content) {
+            
+            var componentBuilder = CreateComponent(content);
+            var embeds = new Embeds();
+            var embedBuilder = embeds.Navigation(content);
+
+            await component.UpdateAsync( message =>
+                {
+                    message.Components = componentBuilder.Build();
+                    message.Embed = embedBuilder.Build();
+                }
+            );
+
+        }
+
+        public async Task Respond(SocketSlashCommand command, INavigation content) {
+                
+                var componentBuilder = CreateComponent(content);
+                var embeds = new Embeds();
+                var embedBuilder = embeds.Navigation(content);
+
+                await command.RespondAsync(components: componentBuilder.Build(), embed: embedBuilder.Build());
         }
 
     }

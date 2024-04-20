@@ -97,7 +97,7 @@ namespace Nero
                 }
             }
             Embeds embeds = new Embeds();
-            EmbedBuilder embed = embeds.DebugExecuted(command);
+            EmbedBuilder embed = embeds.DebugExecuted();
             await command.RespondAsync(embed: embed.Build());
 
         }
@@ -114,7 +114,7 @@ namespace Nero
                 }
             }
             Embeds embeds = new Embeds();
-            var embed = embeds.DebugExecuted(command);
+            var embed = embeds.DebugExecuted();
             await command.RespondAsync(embed: embed.Build());
 
         }

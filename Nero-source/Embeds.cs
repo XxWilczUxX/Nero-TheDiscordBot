@@ -18,10 +18,28 @@ namespace Nero
             return embed;
         }
 
-        public EmbedBuilder DebugExecuted(SocketSlashCommand command)
+        public EmbedBuilder DebugExecuted()
         {
             var embed = new EmbedBuilder()
                 .WithTitle("Done")
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp();
+
+            return embed;
+        }
+
+        public EmbedBuilder Navigation(INavigation navigation) {
+
+            var output = navigation.GetContents().Split('-');
+            string[][] contents = new string[output.Length][];
+
+            for (int i = 0; i < output.Length; i++) {
+                contents[i] = output[i].Split(':');
+            }
+
+            var embed = new EmbedBuilder()
+                .WithTitle($"{contents[0][0]}: {contents[0][1]}")
+                .WithDescription($"{contents[1][0]}: {contents[1][1]}")
                 .WithColor(Color.DarkBlue)
                 .WithCurrentTimestamp();
 

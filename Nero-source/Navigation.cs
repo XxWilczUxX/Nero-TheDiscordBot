@@ -47,7 +47,7 @@ namespace Nero {
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     Formatting = Formatting.Indented,
-                    Converters = { new NeroNavigationConverter() { ParentType = typeof(NetworkArchitecture)} }
+                    Converters = { new NavigationConverter() { ParentType = typeof(NetworkArchitecture)} }
                 };
 
                 var filePath = $"{path}\\{userID}.json";
@@ -78,14 +78,14 @@ namespace Nero {
     }
 
 
-    public class NeroNavigationConverter : JsonConverter {
+    public class NavigationConverter : JsonConverter {
 
-        public Type ParentType { get; set; }
+        public required Type ParentType { get; set; }
         public override bool CanConvert(Type objectType) {
             return (objectType == typeof(Nero.INavigation));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
             JObject jo = JObject.Load(reader);
             // Based on the contents of the JObject, instantiate the correct concrete class that implements Nero.INavigation
             // For example, if your concrete class is Nero.Navigation, you might do:
@@ -100,7 +100,7 @@ namespace Nero {
             }
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
             throw new NotImplementedException();
         }
     }   

@@ -128,8 +128,6 @@ namespace Nero {
 
         public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0, ulong guildID = 0) {
 
-            Console.WriteLine("Creating Network");
-
             switch (level) {
                 case Difficulty.Level.Basic:
                     Difficulty.SecurityDV = 6;
@@ -186,7 +184,7 @@ namespace Nero {
             
             Random random = new Random();
 
-            Console.WriteLine($"Height: {floor.Height} Branches: {branches}; floor.Height: {floor.Height} Size: {Size}");
+            //Console.WriteLine($"Height: {floor.Height} Branches: {branches}; floor.Height: {floor.Height} Size: {Size}");
 
             if(floor.Height < Size-1) {
 
@@ -275,11 +273,15 @@ namespace Nero {
             
             try {
                 // Try to load the network from temp folder
-                network = (NetworkArchitecture)SaveableFactory.LoadTemp((ulong)command.GuildId!, command.User.Id);
+                Console.WriteLine("Loading network.");
+
+                network = SaveableFactory.LoadTemp<NetworkArchitecture>((ulong)command.GuildId!, command.User.Id);
                 
             }
-            catch {
+            catch(Exception e) {
                 // Create the network
+
+                Console.WriteLine($"{e.Message}\n Creating new network.");
 
                 var options = command.Data.Options.First().Options.ToArray();
 

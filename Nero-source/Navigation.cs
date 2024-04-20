@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Nero {
 
@@ -37,23 +38,25 @@ namespace Nero {
             File.WriteAllText( $"{path}\\{userID}.json" , JsonConvert.SerializeObject(saveable, settings: settings) );
         }
 
-        public static Saveable LoadTemp(ulong guildID, ulong userID) {
-            var path = Path.Combine( Directory.GetCurrentDirectory(), $"\\temp\\{guildID}" );
+        public static T LoadTemp<T>(ulong guildID, ulong userID) {
+            var path = $"{Directory.GetCurrentDirectory()}\\Nero-source\\temp\\{guildID}";
 
             if (Directory.Exists(path))
             {
                 var settings = new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
+                    Formatting = Formatting.Indented,
+                    Converters = { new NeroNavigationConverter() { ParentType = typeof(NetworkArchitecture)} }
                 };
 
                 var filePath = $"{path}\\{userID}.json";
 
+
                 if (File.Exists(filePath))
                 {
                     var json = File.ReadAllText(filePath);
-                    var saveable = JsonConvert.DeserializeObject<Saveable>(json, settings: settings);
+                    var saveable = JsonConvert.DeserializeObject<T>(json, settings: settings);
                     if (saveable != null)
                     {
                         return saveable;
@@ -75,6 +78,34 @@ namespace Nero {
     }
 
 
+    public class NeroNavigationConverter : JsonConverter {
+
+        public Type ParentType { get; set; }
+        public override bool CanConvert(Type objectType) {
+            return (objectType == typeof(Nero.INavigation));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+            JObject jo = JObject.Load(reader);
+            // Based on the contents of the JObject, instantiate the correct concrete class that implements Nero.INavigation
+            // For example, if your concrete class is Nero.Navigation, you might do:
+            if(ParentType == typeof(NetworkArchitecture)) {
+                return jo.ToObject<Nero.Floor>(serializer)!;
+            }
+            //else if(ParentType == typeof(OtherClass)) {
+            //    return jo.ToObject<Nero.NextClass>(serializer)!;
+            //}
+            else {
+                throw new Exception("Failed to deserialize object.");
+            }
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+            throw new NotImplementedException();
+        }
+    }   
+
+
     public class NavigationActions { // Maybe i can make a inherited class from Saveable, so i don't fuck up the interface idk...
 
         public async Task NavigationHandler(SocketMessageComponent component) {
@@ -86,10 +117,10 @@ namespace Nero {
         public static ComponentBuilder CreateComponent(INavigation content) {
 
             var builder = new ComponentBuilder()
-                .WithButton("Left", $"nav_left", ButtonStyle.Primary, disabled: content.Left()!=content)
-                .WithButton("Right", $"nav_right", ButtonStyle.Primary, disabled: content.Right()!=content)
-                .WithButton("Up", $"nav_up", ButtonStyle.Primary, disabled: content.Up()!=content)
-                .WithButton("Down", $"nav_down", ButtonStyle.Primary, disabled: content.Down()!=content)
+                .WithButton("Left", $"nav_left", ButtonStyle.Primary, disabled: content.Left()==content)
+                .WithButton("Right", $"nav_right", ButtonStyle.Primary, disabled: content.Right()==content)
+                .WithButton("Up", $"nav_up", ButtonStyle.Primary, disabled: content.Up()==content)
+                .WithButton("Down", $"nav_down", ButtonStyle.Primary, disabled: content.Down()==content)
             ;
 
             return builder;

@@ -24,7 +24,8 @@ namespace Nero {
     
     public static class SaveableFactory {
         public static void SaveTemp(Saveable saveable, ulong guildID, ulong userID) {
-            var path = Path.Combine( Directory.GetCurrentDirectory(), $"\\temp\\{guildID}" );
+
+            var path = $"{Directory.GetCurrentDirectory()}\\Nero-source\\temp\\{guildID}";
 
             Directory.CreateDirectory(path);
 

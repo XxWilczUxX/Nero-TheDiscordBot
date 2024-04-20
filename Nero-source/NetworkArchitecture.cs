@@ -128,6 +128,8 @@ namespace Nero {
 
         public NetworkArchitecture(Difficulty.Level level, int size = 0, int branches = 0, ulong guildID = 0) {
 
+            Console.WriteLine("Creating Network");
+
             switch (level) {
                 case Difficulty.Level.Basic:
                     Difficulty.SecurityDV = 6;
@@ -169,8 +171,9 @@ namespace Nero {
             }
             Navigation = new Floor();
 
-            int branchesLeft; // Assign a variable to the 'out' parameter
-            Navigation = CreateBranch((Floor)Navigation, Size, Branches, out branchesLeft);
+            int empty;
+
+            Navigation = CreateBranch((Floor)Navigation, Branches, out empty);
 
             Navigation = ReturnToHeight((Floor)Navigation, 0);
 
@@ -179,37 +182,25 @@ namespace Nero {
         }
 
 
-        private Floor CreateBranch(Floor floor, int maxHeight, int maxBranches, out int branchesLeft, bool isBranch = false) { //This doesn't work for creating side branches. It only works for creating the main branch. 
+        private Floor CreateBranch(Floor floor, int branches, out int branchesLeft, int iteration = 0) { // It works now but it's complicated, iteration is used to prevent one branch from having all the branches overall. It's a bit of a mess but it works.
             
             Random random = new Random();
 
-            if(isBranch? floor.Height < maxHeight-2 : floor.Height < maxHeight-1) {
-                
-                if(isBranch) {
-                    if(random.Next(1, 3) == 1) {
-                        branchesLeft = maxBranches;
-                        return floor;
-                    }
-                }
+            Console.WriteLine($"Height: {floor.Height} Branches: {branches}; floor.Height: {floor.Height} Size: {Size}");
+
+            if(floor.Height < Size-1) {
 
                 floor.AddNext();
-                if((Floor)floor.Down() != floor) {
-                    CreateBranch((Floor)floor.Down(), maxHeight, maxBranches, out branchesLeft, isBranch);
-                }
-                else {
-                    branchesLeft = maxBranches;
-                }
-                if(random.Next(1, 3) != 1 && branchesLeft > 0 && floor.Height != maxHeight-2 && (Floor)floor.Right() != floor) {
+
+                if(random.Next(1, 11) >= 7 && random.Next(1,11) >= 5 + iteration && branches > 0 && floor.Height < Size-2 && floor.Height > 1){
                     floor.AddNext();
-                    branchesLeft--;;
-                    CreateBranch((Floor)floor.Right(), maxHeight, branchesLeft, out branchesLeft, true);
+                    branches--;
+                    floor.Branch = CreateBranch((Floor)floor.Right(), branches, out branches, iteration+1);
                 }
+                floor.Child = CreateBranch((Floor)floor.Down(), branches, out branches, iteration);
 
-
-            } else {
-                branchesLeft = maxBranches;
             }
-
+            branchesLeft = branches;
             return floor;
         }
 
@@ -318,14 +309,11 @@ namespace Nero {
                 network.PreorderConsole((network.Navigation as Floor)!);
                 Console.WriteLine("\n");
 
-                var settings = new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                };
             }
             finally {
                 var navigationActions = new NavigationActions();
                 await navigationActions.Respond(command, network.Navigation);
+                SaveableFactory.SaveTemp(network, (ulong)command.GuildId!, command.User.Id);
             }   
 
         }

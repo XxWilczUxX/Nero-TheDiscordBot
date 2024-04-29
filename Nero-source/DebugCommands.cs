@@ -36,12 +36,22 @@ namespace Nero
                 case "shutdown":
                     var info = new Info();
                     if(command.User.Id == info.HeadAdminID) {
-                        await command.RespondAsync("Shutting down...");
-                        await _client.SetCustomStatusAsync("shutting down");
-                        await _client.StopAsync();
-                        await _client.LogoutAsync();
-                        _client.Dispose();
-                        Environment.Exit(0);
+
+                        var embeds = new Embeds();
+                        await command.RespondAsync("",embed: embeds.Info("Shutdown", "The bot has been shut down.").Build())
+                            .ContinueWith(async _ =>{
+                                await _client.LogoutAsync();
+                                Console.WriteLine("Logged out...");
+
+                                await _client.StopAsync();
+                                Console.WriteLine("Client stopped...");
+
+                                await Task.Delay(TimeSpan.FromSeconds(2));
+
+                                Console.WriteLine("Exiting...");
+                                Environment.Exit(0);
+                            });
+
                     }
                     break;
                 //

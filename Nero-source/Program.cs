@@ -9,6 +9,11 @@ namespace Nero {
         public string Token { get; set; } = string.Empty;
         public ulong BasementGuildID { get; set; }
         public ulong HeadAdminID { get; set; }
+
+        public Info() {
+            JsonConvert.PopulateObject(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")), this);
+        }
+
     }
 
     public class Names {
@@ -30,9 +35,6 @@ namespace Nero {
         private Info info = new Info();
         public async Task MainAsync() {
 
-#pragma warning disable CS8601 // Possible null reference assignment.
-            info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
-#pragma warning restore CS8601 // Possible null reference assignment.
             if (info == null) {
                 info = new Info();
             }
@@ -68,7 +70,7 @@ namespace Nero {
 
             var guild = _client.GetGuild(info.BasementGuildID);
             var commandBuilders = new CommandBuilders();
-            var guildCommand = commandBuilders.Network;
+            var guildCommand = commandBuilders.Debug;
 
             try {
                 await guild.CreateApplicationCommandAsync(guildCommand.Build());

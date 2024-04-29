@@ -18,6 +18,17 @@ namespace Nero
             return embed;
         }
 
+        public EmbedBuilder Info(string title, string errorMessage)
+        {
+            var embed = new EmbedBuilder()
+                .WithTitle(title)
+                .WithDescription(errorMessage)
+                .WithColor(Color.Green)
+                .WithCurrentTimestamp();
+            
+            return embed;
+        }
+
         public EmbedBuilder DebugExecuted()
         {
             var embed = new EmbedBuilder()

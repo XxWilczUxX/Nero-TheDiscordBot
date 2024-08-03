@@ -9,7 +9,7 @@ namespace Nero
     public class Info
     {
         public string Token { get; set; } = string.Empty;
-        public ulong BasementGuildID { get; set; }
+        public ulong TestplaceID { get; set; }
     }
 
     public class Names
@@ -34,9 +34,22 @@ namespace Nero
         public async Task MainAsync()
         {
 
-#pragma warning disable CS8601 // Possible null reference assignment.
-            info = JsonConvert.DeserializeObject<Info>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json")));
-#pragma warning restore CS8601 // Possible null reference assignment.
+            var tokenFile = Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json");
+
+            if(File.Exists(tokenFile)) {
+                var tokenInfo = File.ReadAllText(tokenFile);
+
+                if(!string.IsNullOrEmpty(tokenInfo)) {
+                    var deserializedInfo = JsonConvert.DeserializeObject<Info>(tokenInfo);
+
+                    if(deserializedInfo != null) {
+                        info = deserializedInfo;
+                    }
+
+                }
+            }
+
+            
             if (info == null)
             {
                 info = new Info();
@@ -47,9 +60,6 @@ namespace Nero
 
             _client.Log += Log;
             _client.Ready += Client_Ready;
-            _client.ModalSubmitted += ModalHandler;
-            _client.ButtonExecuted += ButtonHandler;
-            _client.SelectMenuExecuted += SelectMenuHandler;
 
             string Token = info.Token;
 
@@ -74,7 +84,9 @@ namespace Nero
         public async Task Client_Ready()
         {
 
-            var guild = _client.GetGuild(info.BasementGuildID);
+            /*
+
+            var guild = _client.GetGuild(info.TestplaceID);
 
             var commandBuilders = new CommandBuilders();
 
@@ -90,6 +102,8 @@ namespace Nero
                 Console.WriteLine(ex.Message);
             }
 
+            */
+
 
             _client.SlashCommandExecuted += SlashCommandHandler;
 
@@ -101,68 +115,11 @@ namespace Nero
 
             switch(command.CommandName)
             {
-                case "debug":
-                    var debug = new DebugCommands();
-                    await debug.CommandHandler(command, _client.GetGuild(info.BasementGuildID), _client);
-                    break;
-                case "roll":
-                    var comm = new GeneralCommands();
-                    await comm.Roll(command);
-                    break;
-                case "character":
-                    var character = new CharacterCommands();
-                    await character.CommandHandler(command);
-                    break;
-            }
-        }
 
-        private async Task ModalHandler(SocketModal modal)
-        {
+                default:
+                    await command.RespondAsync("Working");
+                    return;
 
-            if (modal.Data.CustomId == "characterCreate_1") {
-                var comm = new Nero.CharacterCommands();
-                await comm.CreationModalHandler(modal);
-            }
-            else {
-                var comm = new Nero.CharacterCommands();
-                await comm.SubskillModalHandler(modal);
-            }
-
-        }
-
-        private async Task ButtonHandler(SocketMessageComponent component)
-        {
-            // Syntax: type_action_pos_num_optional...
-            string type = component.Data.CustomId.Split("_").First();
-            string action = component.Data.CustomId.Split("_").ToArray()[1];
-            switch(type)
-            {
-                case "stat":
-                case "skill":
-                    switch(action)
-                    {
-                        case "add":
-                        case "move":
-                        case "confirm":
-                        case "new":
-                        case "remove":
-                            var comm = new Nero.CharacterCommands();
-                            await comm.StatDistributor(component);
-                            break;
-                        
-                    }
-                break;
-            }
-        }
-
-        private async Task SelectMenuHandler(SocketMessageComponent component)
-        {
-            switch(component.Data.CustomId)
-            {
-                case "charCreateRole":
-                    var comm = new Nero.CharacterCommands();
-                    await comm.StatDistributor(component);
-                    break;
             }
         }
 

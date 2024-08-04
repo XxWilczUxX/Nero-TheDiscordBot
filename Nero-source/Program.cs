@@ -92,7 +92,7 @@ namespace Nero
 
             var commandBuilders = new CommandBuilders();
 
-            var guildCommand = commandBuilders.Debug;
+            var guildCommand = commandBuilders.Roll;
 
             try
             {
@@ -120,7 +120,11 @@ namespace Nero
                     var debug = new DebugCommands();
 
                     await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client);
+                    return;
+                case "roll":
+                    var rollCommand = new RollCommand().Roll;
 
+                    await rollCommand(command);
                     return;
                 default:
                     await command.RespondAsync("Working");

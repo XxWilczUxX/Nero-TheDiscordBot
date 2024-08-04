@@ -58,6 +58,29 @@ namespace Nero
             )
         ;
 
+        
+
+        public readonly SlashCommandBuilder Roll = new SlashCommandBuilder()
+            .WithName("roll")
+            .WithDescription("Roll a dice")
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("sides")
+                .WithDescription("State a number of sides of the dice")
+                .WithType(ApplicationCommandOptionType.Integer)
+                .WithMinValue(2)
+                .WithRequired(true)
+
+            )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("times")
+                .WithDescription("State a number of dices to roll")
+                .WithType(ApplicationCommandOptionType.Integer)
+                .WithMinValue(1)
+                .WithRequired(false)
+
+            )
+        ;
+
 
     }
 

@@ -7,7 +7,7 @@ namespace Nero
     public class DebugCommands
     {
 
-        public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client)
+        public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client, Info info)
         {
             switch(command.Data.Options.First().Name)
             {
@@ -34,7 +34,7 @@ namespace Nero
                     }
                     break;
                 case "shutdown":
-                    var info = new Info();
+
                     if(command.User.Id == info.HeadAdminID) {
 
                         var embeds = new Embeds();
@@ -52,6 +52,9 @@ namespace Nero
                                 Environment.Exit(0);
                             });
 
+                    } else {
+                        var embeds = new Embeds();
+                        await command.RespondAsync("",embed: embeds.Error("You don't have permissions to run this command.").Build());
                     }
                     break;
                 //

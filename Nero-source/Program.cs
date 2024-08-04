@@ -119,7 +119,7 @@ namespace Nero
                 case "debug":
                     var debug = new DebugCommands();
 
-                    await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client);
+                    await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client, info);
                     return;
                 case "roll":
                     var rollCommand = new RollCommand().Roll;

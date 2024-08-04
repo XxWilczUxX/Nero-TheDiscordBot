@@ -10,6 +10,7 @@ namespace Nero
     {
         public string Token { get; set; } = string.Empty;
         public ulong TestplaceID { get; set; }
+        public ulong HeadAdminID { get; set; }
     }
 
     public class Names
@@ -84,13 +85,14 @@ namespace Nero
         public async Task Client_Ready()
         {
 
-            /*
+
+
 
             var guild = _client.GetGuild(info.TestplaceID);
 
             var commandBuilders = new CommandBuilders();
 
-            var guildCommand = commandBuilders.Roll;
+            var guildCommand = commandBuilders.Debug;
 
             try
             {
@@ -102,7 +104,6 @@ namespace Nero
                 Console.WriteLine(ex.Message);
             }
 
-            */
 
 
             _client.SlashCommandExecuted += SlashCommandHandler;
@@ -115,7 +116,12 @@ namespace Nero
 
             switch(command.CommandName)
             {
+                case "debug":
+                    var debug = new DebugCommands();
 
+                    await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client);
+
+                    return;
                 default:
                     await command.RespondAsync("Working");
                     return;

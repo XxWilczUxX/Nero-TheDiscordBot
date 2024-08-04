@@ -73,10 +73,10 @@ namespace Nero
             )
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("times")
-                .WithDescription("State a number of dices to roll")
+                .WithDescription("State a number of dices to roll (max 25)")
                 .WithType(ApplicationCommandOptionType.Integer)
-                .WithMinValue(1)
                 .WithRequired(false)
+                .WithMinValue(1)
 
             )
         ;

@@ -92,7 +92,7 @@ namespace Nero
 
             var commandBuilders = new CommandBuilders();
 
-            var guildCommand = commandBuilders.Roll;
+            var guildCommand = commandBuilders.Session;
 
             try
             {
@@ -126,8 +126,15 @@ namespace Nero
 
                     await rollCommand(command);
                     return;
+                case "session":
+                    var sessionCommandHandler = new SessionCommand().CommandHandler;
+
+                    await sessionCommandHandler(command);
+                    return;
                 default:
-                    await command.RespondAsync("Working");
+                    var embeds = new Embeds();
+
+                    await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
                     return;
 
             }

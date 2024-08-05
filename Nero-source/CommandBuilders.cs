@@ -81,6 +81,22 @@ namespace Nero
             )
         ;
 
+        public readonly SlashCommandBuilder Session = new SlashCommandBuilder()
+            .WithName("session")
+            .WithDescription("Command family for creation and management of sessions")
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("create")
+                .WithDescription("Creates a new game session")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("name")
+                    .WithDescription("choose the session characteristical name.")
+                    .WithType(ApplicationCommandOptionType.String)
+                    .WithRequired(true)
+                )
+            )
+        ;
+
 
     }
 

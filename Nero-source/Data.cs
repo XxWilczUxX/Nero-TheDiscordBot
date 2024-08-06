@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Nero;
 
-class Log {
+public class Log {
     public ulong ChannelID { get; set; }
     public ulong AuthorID { get; set; }
     public string LogMessage { get; set; }
@@ -52,6 +52,26 @@ public class DataController {
         log.Add(new Log(channelID, authorID, LogMessage));
 
         File.WriteAllText(logFilePath, JsonConvert.SerializeObject(log, Formatting.Indented));
+
+    }
+
+    public List<Log> GetLogs(ulong guildID, ulong channelID) {
+
+        PathCheck(guildID, channelID);
+
+        var logFilePath = Path.Combine(botDataPath, guildID.ToString(), channelID.ToString(), "log.json");
+
+        if(File.Exists(logFilePath) == false) {
+            File.Create(logFilePath).Close();
+        }
+
+        string fileContents = File.ReadAllText(logFilePath);
+
+        List<Log> log;
+        
+        log = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
+
+        return log;
 
     }
 

@@ -52,25 +52,50 @@ public class SessionCommand
 
         if (socketChannel != null) {
 
-            var logMessage =  command.Data.Options.First().Options.First().Value.ToString();
-            var embeds = new Embeds();
-
-            if(logMessage != "" && logMessage != null) {
-
-                var dataController = new DataController();
-
-                dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Id, logMessage);
-
-                await command.RespondAsync(embed: embeds.Log(command.User , logMessage).Build());
-            } else {
-
-                await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
+            switch (command.Data.Options.First().Options.First().Name) {
+                case "create":
+                    await LogCreate(command, socketChannel);
+                    return;
+                case "read":
+                    await LogRead(command, socketChannel);
+                    return;
+                default:
+                    var embeds = new Embeds();
+                    await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                    return;
             }
-
+            
         } else {
             var embeds = new Embeds();
             await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
         }
+
+    }
+
+    private async Task LogCreate(SocketSlashCommand command, IThreadChannel socketChannel) {
+
+        var logMessage =  command.Data.Options.First().Options.First().Options.First().Value.ToString(); // session log create text
+        var embeds = new Embeds();
+        if(logMessage != "" && logMessage != null) {
+
+            var dataController = new DataController();
+            dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Id, logMessage);
+
+            await command.RespondAsync(embed: embeds.Info("Log created", logMessage).Build());
+
+        } else {
+            await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
+        }
+
+    }
+
+    private async Task LogRead(SocketSlashCommand command, IThreadChannel socketChannel) {
+
+        var DataController = new DataController();
+
+        var logs = DataController.GetLogs(socketChannel.GuildId, socketChannel.Id);
+
+        await command.RespondAsync(logs.Count == 0 ? "No logs found." : $"Logs:\n{string.Join("\n", logs.Select(log => log.LogMessage))}");
 
     }
 }

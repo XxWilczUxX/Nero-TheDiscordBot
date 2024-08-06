@@ -1,5 +1,6 @@
 using Discord;
 using Discord.WebSocket;
+using Microsoft.VisualBasic;
 
 namespace Nero;
 
@@ -57,14 +58,30 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Log(SocketUser user, string logMessage)
+    /* - To-do later
+
+    public EmbedBuilder Log(List<Log> log) 
     {
         var embed = new EmbedBuilder()
-            .WithTitle($"Log by {user.GlobalName}")
-            .WithDescription(logMessage)
+            .WithTitle($"Logs")
             .WithColor(Color.Gold)
             .WithCurrentTimestamp();
         
+        foreach(var entry in log) {
+
+            var program = new Program();
+            
+            var field = new EmbedFieldBuilder()
+                .WithName($"Log entry.")
+                .WithValue(entry.LogMessage)
+                .WithIsInline(false);
+
+            embed.AddField(field);
+
+        }
+
         return embed;
     }
+
+    */
 }

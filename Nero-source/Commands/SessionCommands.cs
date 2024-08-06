@@ -2,7 +2,6 @@ using Discord;
 using Discord.WebSocket;
 
 namespace Nero;
-
 public class SessionCommand
 {
     public async Task CommandHandler(SocketSlashCommand command) {
@@ -54,13 +53,17 @@ public class SessionCommand
         if (socketChannel != null) {
 
             var logMessage =  command.Data.Options.First().Options.First().Value.ToString();
-
             var embeds = new Embeds();
 
             if(logMessage != "" && logMessage != null) {
-                var logEmbed = embeds.Log(command.User , logMessage);
-                await command.RespondAsync(embed: logEmbed.Build());
+
+                var dataController = new DataController();
+
+                dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Username, logMessage);
+
+                await command.RespondAsync(embed: embeds.Log(command.User , logMessage).Build());
             } else {
+
                 await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
             }
 

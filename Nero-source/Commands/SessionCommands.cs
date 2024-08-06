@@ -59,7 +59,7 @@ public class SessionCommand
 
                 var dataController = new DataController();
 
-                dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Username, logMessage);
+                dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Id, logMessage);
 
                 await command.RespondAsync(embed: embeds.Log(command.User , logMessage).Build());
             } else {

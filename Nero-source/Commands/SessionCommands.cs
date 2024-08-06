@@ -11,6 +11,9 @@ public class SessionCommand
             case "create":
                 await Create(command);
                 return;
+            case "log":
+                await Log(command);
+                return;
             default:
                 var embeds = new Embeds();
 
@@ -42,5 +45,29 @@ public class SessionCommand
             var embeds = new Embeds();
             await command.RespondAsync(embed: embeds.Error("Channel Error.").Build());
         }
+    }
+
+    private async Task Log(SocketSlashCommand command) {
+
+        var socketChannel = command.Channel as IThreadChannel;
+
+        if (socketChannel != null) {
+
+            var logMessage =  command.Data.Options.First().Options.First().Value.ToString();
+
+            var embeds = new Embeds();
+
+            if(logMessage != "" && logMessage != null) {
+                var logEmbed = embeds.Log(command.User , logMessage);
+                await command.RespondAsync(embed: logEmbed.Build());
+            } else {
+                await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
+            }
+
+        } else {
+            var embeds = new Embeds();
+            await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+        }
+
     }
 }

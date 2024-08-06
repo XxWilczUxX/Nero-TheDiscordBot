@@ -1,7 +1,6 @@
 using Discord;
 
 namespace Nero;
-
 public class CommandBuilders
 {
 
@@ -85,6 +84,17 @@ public class CommandBuilders
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("name")
                 .WithDescription("choose the session characteristical name.")
+                .WithType(ApplicationCommandOptionType.String)
+                .WithRequired(true)
+            )
+        )
+        .AddOption(new SlashCommandOptionBuilder()
+            .WithName("log")
+            .WithDescription("Creates a log entry in the session")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("text")
+                .WithDescription("The log description")
                 .WithType(ApplicationCommandOptionType.String)
                 .WithRequired(true)
             )

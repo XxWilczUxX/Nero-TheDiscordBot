@@ -58,8 +58,6 @@ public class Embeds
         return embed;
     }
 
-    /* - To-do later
-
     public EmbedBuilder Log(List<Log> log) 
     {
         var embed = new EmbedBuilder()
@@ -83,5 +81,4 @@ public class Embeds
         return embed;
     }
 
-    */
 }

@@ -81,7 +81,9 @@ public class SessionCommand
             var dataController = new DataController();
             dataController.SaveLog(socketChannel.GuildId, socketChannel.Id, command.User.Id, logMessage);
 
-            await command.RespondAsync(embed: embeds.Info("Log created", logMessage).Build());
+            var logs = dataController.GetLogs(command.GuildId?? 0, command.ChannelId?? 0);
+
+            await command.RespondAsync(embed: embeds.Log(logs).Build());
 
         } else {
             await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
@@ -95,7 +97,8 @@ public class SessionCommand
 
         var logs = DataController.GetLogs(socketChannel.GuildId, socketChannel.Id);
 
-        await command.RespondAsync(logs.Count == 0 ? "No logs found." : $"Logs:\n{string.Join("\n", logs.Select(log => log.LogMessage))}");
+        var embeds = new Embeds();
+        await command.RespondAsync(embed: embeds.Log(logs).Build());
 
     }
 }

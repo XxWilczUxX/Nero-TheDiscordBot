@@ -59,6 +59,8 @@ class Program
         _client.Log += Log;
         _client.Ready += Client_Ready;
 
+        _client.InteractionCreated += HandleInteraction;
+
         string Token = info.Token;
 
         if(Token == string.Empty)
@@ -126,5 +128,36 @@ class Program
                 await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
                 return;
         }
+    }
+
+    private async Task HandleInteraction(SocketInteraction interaction)
+    {
+
+        if(interaction is SocketMessageComponent component) {
+
+            switch(component.Data.CustomId) {
+                case "log_maxleft":
+                    
+                    break;
+                case "log_left":
+                
+                    break;
+                case "log_right":
+                
+                    break;
+                case "log_maxright":
+                
+                    break;
+                default:
+                    var embeds = new Embeds();
+                    
+                    await interaction.RespondAsync(embed: embeds.Error("Not yet implemented.").Build());
+                    break;
+
+
+            }
+
+        }
+
     }
 }

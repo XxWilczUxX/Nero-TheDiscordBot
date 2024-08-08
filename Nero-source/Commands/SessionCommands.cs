@@ -83,7 +83,7 @@ public class SessionCommand
 
             var logs = dataController.GetLogs(command.GuildId?? 0, command.ChannelId?? 0);
 
-            await command.RespondAsync(embed: embeds.Log(logs).Build());
+            await command.RespondAsync(embed: embeds.Info("Success", "Log created.").Build());
 
         } else {
             await command.RespondAsync(embed: embeds.Error("No message to log.").Build());
@@ -98,7 +98,34 @@ public class SessionCommand
         var logs = DataController.GetLogs(socketChannel.GuildId, socketChannel.Id);
 
         var embeds = new Embeds();
-        await command.RespondAsync(embed: embeds.Log(logs).Build());
+
+        var maxLeft = new ButtonBuilder()
+            .WithLabel("⏪")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId("log_maxleft")
+        ;
+        var left = new ButtonBuilder()
+            .WithLabel("⬅️")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId("log_left")
+        ;
+        var right = new ButtonBuilder()
+            .WithLabel("➡️")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId("log_right")
+        ;
+        var maxRight = new ButtonBuilder()
+            .WithLabel("⏩")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId("log_maxright")
+        ;
+        var component = new ComponentBuilder()
+            .WithButton(maxLeft)
+            .WithButton(left)
+            .WithButton(right)
+            .WithButton(maxRight)
+        ;
+        await command.RespondAsync(embed: embeds.Log(logs).Build(), components: component.Build());
 
     }
 }

@@ -7,7 +7,7 @@ namespace Nero;
 public class SessionCommand
 {
     private readonly SessionManager _sessionManager;
-    private const int maxSessionsPerUser = 10;
+    private const int maxSessionsPerUser = 10; // I'd rather have this in a file (somethng like profiles of settings for the bot in json(ofc))
     public SessionCommand()
         => _sessionManager = new SessionManager(maxSessionsPerUser);
     public async Task CommandHandler(SocketSlashCommand command)

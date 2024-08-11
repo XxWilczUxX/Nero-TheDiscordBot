@@ -2,7 +2,7 @@ using System;
 using Discord;
 using Newtonsoft.Json;
 
-// The data here needs to be standardized for saving and loading with future easier implementation of new things that will need to be saved. (I dont know but i want this on json because i can't afford a database)
+// The data here needs to be standardized for saving and loading with future easier implementation of new things that will need to be saved. (I dont know yet how exacly this should look but i want this on json because i can't afford a database)
 
 namespace Nero;
 

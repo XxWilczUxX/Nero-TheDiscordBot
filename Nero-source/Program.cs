@@ -34,25 +34,23 @@ class Program
     {
         var tokenFile = Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json");
 
-        if(File.Exists(tokenFile)) {
+        if (File.Exists(tokenFile)) {
             var tokenInfo = File.ReadAllText(tokenFile);
 
-            if(!string.IsNullOrEmpty(tokenInfo)) {
+            if (!string.IsNullOrEmpty(tokenInfo)) {
                 var deserializedInfo = JsonConvert.DeserializeObject<Info>(tokenInfo);
 
-                if(deserializedInfo != null) {
+                if (deserializedInfo != null) {
                     info = deserializedInfo;
                 }
-
             }
         }
 
-        
         if (info == null)
         {
             info = new Info();
         }
-
+        
         _client = new DiscordSocketClient();
         _commands = new CommandService();
 
@@ -61,7 +59,7 @@ class Program
 
         string Token = info.Token;
 
-        if(Token == string.Empty)
+        if (Token == string.Empty)
         {
             Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }

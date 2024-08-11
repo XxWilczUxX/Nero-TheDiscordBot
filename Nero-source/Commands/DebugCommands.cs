@@ -9,7 +9,7 @@ public class DebugCommands
         switch (command.Data.Options.First().Name)
         {
             case "list":
-                switch(command.Data.Options.First().Options.First().Value.ToString())
+                switch (command.Data.Options.First().Options.First().Value.ToString())
                 {
                     case "0":
                         await ListAllGuildCommands(command, guild);
@@ -20,7 +20,7 @@ public class DebugCommands
                 }
                 break;
             case "delete":
-                switch(command.Data.Options.First().Options.First().Value.ToString())
+                switch (command.Data.Options.First().Options.First().Value.ToString())
                 {
                     case "0":
                         await DeleteAllGuildCommands(command, guild);
@@ -31,9 +31,7 @@ public class DebugCommands
                 }
                 break;
             case "shutdown":
-
-                if(command.User.Id == info.HeadAdminID) {
-
+                if (command.User.Id == info.HeadAdminID) {
                     var embeds = new Embeds();
                     await command.RespondAsync("",embed: embeds.Info("Shutdown", "The bot has been shut down.").Build())
                         .ContinueWith(async _ =>{

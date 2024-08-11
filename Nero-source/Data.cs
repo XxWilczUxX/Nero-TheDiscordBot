@@ -2,6 +2,8 @@ using System;
 using Discord;
 using Newtonsoft.Json;
 
+// The data here needs to be standardized for saving and loading with future easier implementation of new things that will need to be saved. (I dont know but i want this on json because i can't afford a database)
+
 namespace Nero;
 
 public class Log {
@@ -16,7 +18,7 @@ public class Log {
     }
 
 }
-public class DataController {
+public class DataController { 
 
     private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);   
     private static string botDataPath = Path.Combine(appDataPath, "CPBot");

@@ -1,6 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 using Nero.Commands.Session;
+using Nero.Data;
 
 namespace Nero;
 
@@ -14,7 +15,8 @@ public class SessionCommand
                 await Create(command);
                 return;
             case "log":
-
+                var LogCommands = new LogSubCommand();
+                await LogCommands.LogHandler(command, command.Data.Options.First().Options.First().Name);
                 return;
             default:
                 var embeds = new Embeds();
@@ -50,4 +52,6 @@ public class SessionCommand
             await command.RespondAsync(embed: embeds.Error("Channel Error.").Build());
         }
     }
+
+    
 }

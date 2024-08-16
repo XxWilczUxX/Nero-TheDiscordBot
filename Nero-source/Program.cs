@@ -12,6 +12,11 @@ public class Info
     public ulong HeadAdminID { get; set; }
 }
 
+public class Settings
+{
+    private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "settings", "settings.json");
+}
+
 public class Names
 {
     public readonly string[] stats = { "Inteligence", "Reflex", "Agility", "Technology", "Charisma", "Will", "Luck", "Movement", "Body", "Empathy" };
@@ -52,6 +57,10 @@ class Program
         {
             info = new Info();
         }
+
+        Data.DataController dataController = new Data.DataController();
+
+        dataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
         _commands = new CommandService();

@@ -6,16 +6,15 @@ namespace Nero;
 
 public class SessionCommand
 {
-    private readonly SessionManager _sessionManager;
-    private const int maxSessionsPerUser = 10; // I'd rather have this in a file (somethng like profiles of settings for the bot in json(ofc))
-    public SessionCommand()
-        => _sessionManager = new SessionManager(maxSessionsPerUser);
     public async Task CommandHandler(SocketSlashCommand command)
     {
         switch (command.Data.Options.First().Name)
         {
             case "create":
                 await Create(command);
+                return;
+            case "log":
+
                 return;
             default:
                 var embeds = new Embeds();
@@ -27,13 +26,6 @@ public class SessionCommand
     private async Task Create(SocketSlashCommand command)
     {
         var userId = command.User.Id;
-
-        if (!_sessionManager.CanCreateSession(userId))
-        {
-            var embeds = new Embeds();
-            await command.RespondAsync(embed: embeds.Error("You have reached the limit of active sessions.").Build());
-            return;
-        }
 
         var socketChannel = command.Channel as ITextChannel;
 
@@ -47,8 +39,6 @@ public class SessionCommand
             );
 
             string channelMention = $"<#{newSession.Id}>";
-
-            _sessionManager.AddSession(userId, newSession.Id);
 
             await command.RespondAsync($"Session created: {channelMention}");
 

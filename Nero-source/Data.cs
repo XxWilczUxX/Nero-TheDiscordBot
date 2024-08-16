@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 // The data here needs to be standardized for saving and loading with future easier implementation of new things that will need to be saved. (I dont know yet how exacly this should look but i want this on json because i can't afford a database)
 
-namespace Nero;
+namespace Nero.Data;
 
 public class Log {
     public ulong ChannelID { get; set; }
@@ -18,26 +18,57 @@ public class Log {
     }
 
 }
+
+public class User {
+    public ulong UserID { get; set; }
+    public List<ulong> Sessions { get; set; } = new List<ulong>();
+
+    public User(ulong userID) {
+        UserID = userID;
+    }
+
+}
 public class DataController { 
 
     private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);   
     private static string botDataPath = Path.Combine(appDataPath, "CPBot");
 
-    private void PathCheck(ulong guildID, ulong channelID) {
+    public void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
+        var paths = new List<string> {
+            botDataPath,
+            Path.Combine(botDataPath, "settings"),
+            Path.Combine(botDataPath, "guilds"),
+            Path.Combine(botDataPath, "users")
+        };
 
-        if (Directory.Exists(botDataPath) == false) {
-            Directory.CreateDirectory(botDataPath);
+        if(guildID != 0) {
+            paths.Add(Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions"));
+            
+            if(channelID != 0) {
+                paths.Add(Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json"));
+            }
         }
 
-        if(Directory.Exists(Path.Combine(botDataPath, guildID.ToString(), channelID.ToString())) == false) {
-            Directory.CreateDirectory(Path.Combine(botDataPath, guildID.ToString(), channelID.ToString()));
+        if(userID != 0) {
+            paths.Add(Path.Combine(botDataPath, "users", $"{userID}.json"));
         }
 
+        foreach (var path in paths) {
+            if(path.EndsWith(".json") == false) {
+                if(Directory.Exists(path) == false) {
+                    Directory.CreateDirectory(path);
+                }
+            } else {
+                if(File.Exists(path) == false) {
+                    File.Create(path).Close();
+                }
+            }
+        }
     }
 
     public void SaveLog(ulong guildID, ulong channelID, ulong authorID, string LogMessage) {
 
-        PathCheck(guildID, channelID);
+        CreateLocalFiles(guildID, channelID);
 
         var logFilePath = Path.Combine(botDataPath, guildID.ToString(), channelID.ToString(), "log.json");
 
@@ -59,7 +90,7 @@ public class DataController {
 
     public List<Log> GetLogs(ulong guildID, ulong channelID) {
 
-        PathCheck(guildID, channelID);
+        CreateLocalFiles(guildID, channelID);
 
         var logFilePath = Path.Combine(botDataPath, guildID.ToString(), channelID.ToString(), "log.json");
 

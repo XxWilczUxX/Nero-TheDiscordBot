@@ -58,7 +58,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Log(List<Log> log) 
+    public EmbedBuilder Log(List<Data.Log> log) 
     {
         var embed = new EmbedBuilder()
             .WithTitle($"Logs")

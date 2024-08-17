@@ -108,4 +108,26 @@ public class DataController {
 
     }
 
+    public void DeleteLog(ulong guildID, ulong channelID, int logIndex) {
+
+        CreateLocalFiles(guildID, channelID);
+
+        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+
+        if(File.Exists(logFilePath) == false) {
+            File.Create(logFilePath).Close();
+        }
+
+        string fileContents = File.ReadAllText(logFilePath);
+
+        List<Log> log;
+        
+        log = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
+
+        log.RemoveAt(logIndex);
+
+        File.WriteAllText(logFilePath, JsonConvert.SerializeObject(log, Formatting.Indented));
+
+    }
+
 }

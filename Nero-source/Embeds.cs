@@ -79,6 +79,9 @@ public class Embeds
             embed.AddField(field);
 
         }
+        if(i == 0) {
+            embed.WithDescription("No logs.");
+        }
 
         return embed;
     }

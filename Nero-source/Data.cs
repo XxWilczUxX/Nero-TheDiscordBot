@@ -70,7 +70,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var logFilePath = Path.Combine(botDataPath, guildID.ToString(), channelID.ToString(), "log.json");
+        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(logFilePath) == false) {
             File.Create(logFilePath).Close();
@@ -92,7 +92,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var logFilePath = Path.Combine(botDataPath, guildID.ToString(), channelID.ToString(), "log.json");
+        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(logFilePath) == false) {
             File.Create(logFilePath).Close();

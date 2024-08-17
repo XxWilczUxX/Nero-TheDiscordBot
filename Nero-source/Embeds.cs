@@ -65,12 +65,14 @@ public class Embeds
             .WithColor(Color.Gold)
             .WithCurrentTimestamp();
         
+        var i = 0;
         foreach(var entry in log) {
+            i++;
 
             var program = new Program();
             
             var field = new EmbedFieldBuilder()
-                .WithName($"Log entry.")
+                .WithName($"Log entry no. {i}")
                 .WithValue(entry.LogMessage)
                 .WithIsInline(false);
 

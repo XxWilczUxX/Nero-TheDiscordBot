@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Discord;
 using Discord.WebSocket;
 using Nero.Commands.Session;
@@ -28,6 +29,29 @@ public class LogSubCommand
 
     }  
 
+    private MessageComponent createComponents(List<Data.Log> logs, int page) {
+
+        Console.WriteLine(logs.Count);
+
+        var back = new ButtonBuilder()
+            .WithLabel("<")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId($"log-back-{page}")
+            .WithDisabled(logs.Count <= 25);
+
+        var forward = new ButtonBuilder()
+            .WithLabel(">")
+            .WithStyle(ButtonStyle.Primary)
+            .WithCustomId($"log-forward-{page}")
+            .WithDisabled(logs.Count <= 25);
+
+        var component = new ComponentBuilder()
+            .WithButton(back)
+            .WithButton(forward);
+
+        return component.Build();
+    }
+
     private async Task LogCreate(SocketSlashCommand command)
     {
         var userId = command.User.Id;
@@ -44,7 +68,10 @@ public class LogSubCommand
             if(logMessage != null) {
                 dataController.SaveLog(command.GuildId?? 0, socketChannel.Id, userId, logMessage);
 
-                await command.RespondAsync(embed: embeds.Log(dataController.GetLogs(command.GuildId?? 0, socketChannel.Id)).Build());
+                var logs = dataController.GetLogs(command.GuildId?? 0, socketChannel.Id);
+                var embed = embeds.Log(logs, logs.Count / 25).Build();
+
+                await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
             } else {
 
                 await command.RespondAsync(embed: embeds.Error("No message provided.").Build());
@@ -67,7 +94,11 @@ public class LogSubCommand
             var dataController = new Data.DataController();
             var embeds = new Embeds();
 
-            await command.RespondAsync(embed: embeds.Log(dataController.GetLogs(command.GuildId?? 0, socketChannel.Id)).Build());
+            var logs = dataController.GetLogs(command.GuildId?? 0, socketChannel.Id);
+
+            var embed = embeds.Log(logs).Build();
+
+            await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
         }
         else
         {

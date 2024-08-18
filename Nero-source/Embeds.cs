@@ -60,11 +60,13 @@ public class Embeds
 
     public EmbedBuilder Log(List<Data.Log> log, int page = 1) 
     {
+
         var embed = new EmbedBuilder()
             .WithTitle($"Logs")
             .WithDescription($"Page {page+1} of {log.Count/25+1}")
             .WithColor(Color.Gold)
             .WithCurrentTimestamp();
+
 
         for(int i = 25 * page; i < 25 * (1+page); i++) {
 

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.VisualBasic;
 using Nero.Commands.Session;
 
 namespace Nero;
@@ -36,13 +37,13 @@ public class LogSubCommand
         var back = new ButtonBuilder()
             .WithLabel("<")
             .WithStyle(ButtonStyle.Primary)
-            .WithCustomId($"log-back-{page}")
+            .WithCustomId($"log-button.back-{page}")
             .WithDisabled(logs.Count <= 25);
 
         var forward = new ButtonBuilder()
             .WithLabel(">")
             .WithStyle(ButtonStyle.Primary)
-            .WithCustomId($"log-forward-{page}")
+            .WithCustomId($"log-button.forward-{page}")
             .WithDisabled(logs.Count <= 25);
 
         var component = new ComponentBuilder()
@@ -135,5 +136,63 @@ public class LogSubCommand
         }
 
     }
+
+    // Button handling
+
+    public async Task LogHandler(SocketMessageComponent component, string subCommand, int page) // Button Handler
+    {
+        
+        switch(subCommand) {
+            case "button.back":
+
+                if(page > 0) {
+                    await LogRead(component, page - 1);
+                } else {
+                    await LogRead(component, page);
+                }
+
+                return;
+            case "button.forward":
+                await LogRead(component, page + 1);
+                return;
+            default:
+                var embeds = new Embeds();
+                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build(), ephemeral: true);
+                return;
+        }
+
+    } 
+
+    private async Task LogRead(SocketMessageComponent component, int page)
+    {
+
+        var socketChannel = component.Channel as ITextChannel;
+
+        if (socketChannel != null && socketChannel.GetChannelType() == ChannelType.PrivateThread)
+        {
+            var dataController = new Data.DataController();
+            var embeds = new Embeds();
+
+            var logs = dataController.GetLogs(component.GuildId?? 0, socketChannel.Id);
+
+            if(logs.Count / 25 + 1 <= page) {
+                page = logs.Count / 25;
+            }
+
+            var embed = embeds.Log(logs, page).Build();
+
+            await component.UpdateAsync(msg => {
+                msg.Embeds = new[] { embed };
+                msg.Components = new Optional<MessageComponent>(createComponents(logs, page));
+            });
+        }
+        else
+        {
+            var embeds = new Embeds();
+            await component.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+        }
+    }
+
+
 
 }

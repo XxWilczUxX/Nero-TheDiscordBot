@@ -68,6 +68,8 @@ class Program
         _client.Log += Log;
         _client.Ready += Client_Ready;
 
+        _client.ButtonExecuted += ButtonHandler;
+
         string Token = info.Token;
 
         if(Token == string.Empty)
@@ -133,6 +135,25 @@ class Program
                 var embeds = new Embeds();
 
                 await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                return;
+        }
+    }
+
+    private async Task ButtonHandler(SocketMessageComponent component)
+    {
+
+        var idParts = component.Data.CustomId.Split('-');
+
+        switch(idParts[0])
+        {
+            case "log":
+                var logCommands = new LogSubCommand();
+
+                await logCommands.LogHandler(component, idParts[1], int.Parse(idParts[2]));
+                return;
+            default:
+                var embeds = new Embeds();
+                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }

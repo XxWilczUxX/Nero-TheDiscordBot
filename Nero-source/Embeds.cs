@@ -58,24 +58,30 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Log(List<Log> log) 
+    public EmbedBuilder Log(List<Data.Log> log, int page = 1) 
     {
+
         var embed = new EmbedBuilder()
             .WithTitle($"Logs")
+            .WithDescription($"Page {page+1} of {log.Count/25+1}")
             .WithColor(Color.Gold)
             .WithCurrentTimestamp();
-        
-        foreach(var entry in log) {
 
-            var program = new Program();
-            
+
+        for(int i = 25 * page; i < 25 * (1+page); i++) {
+
+            if(i >= log.Count) {
+                break;
+            }
+
+            var entry = log[i];
+
             var field = new EmbedFieldBuilder()
-                .WithName($"Log entry.")
+                .WithName($"Log entry no. {i+1}")
                 .WithValue(entry.LogMessage)
                 .WithIsInline(false);
 
             embed.AddField(field);
-
         }
 
         return embed;

@@ -108,5 +108,16 @@ public class CommandBuilders
                 .WithDescription("Reads the log entries")
                 .WithType(ApplicationCommandOptionType.SubCommand)
             )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("delete")
+                .WithDescription("Deletes a log entry at given number")
+                .WithType(ApplicationCommandOptionType.SubCommand)
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("index")
+                    .WithDescription("The log number")
+                    .WithType(ApplicationCommandOptionType.Integer)
+                    .WithRequired(true)
+                )
+            )
         );
 }

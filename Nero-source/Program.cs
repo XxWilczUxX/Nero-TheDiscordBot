@@ -12,6 +12,11 @@ public class Info
     public ulong HeadAdminID { get; set; }
 }
 
+public class Settings
+{
+    private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "settings", "settings.json");
+}
+
 public class Names
 {
     public readonly string[] stats = { "Inteligence", "Reflex", "Agility", "Technology", "Charisma", "Will", "Luck", "Movement", "Body", "Empathy" };
@@ -53,11 +58,17 @@ class Program
             info = new Info();
         }
 
+        Data.DataController dataController = new Data.DataController();
+
+        dataController.CreateLocalFiles();
+
         _client = new DiscordSocketClient();
         _commands = new CommandService();
 
         _client.Log += Log;
         _client.Ready += Client_Ready;
+
+        _client.ButtonExecuted += ButtonHandler;
 
         string Token = info.Token;
 
@@ -124,6 +135,25 @@ class Program
                 var embeds = new Embeds();
 
                 await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                return;
+        }
+    }
+
+    private async Task ButtonHandler(SocketMessageComponent component)
+    {
+
+        var idParts = component.Data.CustomId.Split('-');
+
+        switch(idParts[0])
+        {
+            case "log":
+                var logCommands = new LogSubCommand();
+
+                await logCommands.LogHandler(component, idParts[1], int.Parse(idParts[2]));
+                return;
+            default:
+                var embeds = new Embeds();
+                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }

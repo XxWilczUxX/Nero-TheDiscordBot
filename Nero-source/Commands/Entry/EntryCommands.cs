@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.VisualBasic;
-using Nero.Commands.Session;
 
 namespace Nero;
 
@@ -53,28 +52,34 @@ public class LogSubCommand
         return component.Build();
     }
 
+    private bool IsThread(ITextChannel channel) {
+        return channel.GetChannelType() == ChannelType.PrivateThread || channel.GetChannelType() == ChannelType.PublicThread;
+    }
+
     private async Task LogCreate(SocketSlashCommand command)
     {
         var userId = command.User.Id;
 
         var socketChannel = command.Channel as ITextChannel;
 
-        if (socketChannel != null && socketChannel.GetChannelType() == ChannelType.PrivateThread)
+        if (socketChannel != null && IsThread(socketChannel))
         {
             var dataController = new Data.DataController();
             var embeds = new Embeds();
 
             var logMessage = command.Data.Options.First().Options.First().Options.First().Value.ToString();
 
-            if(logMessage != null) {
-                dataController.SaveLog(command.GuildId?? 0, socketChannel.Id, userId, logMessage);
+            if (!string.IsNullOrEmpty(logMessage))
+            {
+                dataController.SaveLog(command.GuildId ?? 0, socketChannel.Id, userId, logMessage);
 
-                var logs = dataController.GetLogs(command.GuildId?? 0, socketChannel.Id);
+                var logs = dataController.GetLogs(command.GuildId ?? 0, socketChannel.Id);
                 var embed = embeds.Log(logs, logs.Count / 25).Build();
 
                 await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
-            } else {
-
+            }
+            else
+            {
                 await command.RespondAsync(embed: embeds.Error("No message provided.").Build());
             }
         }
@@ -89,11 +94,11 @@ public class LogSubCommand
     {
 
         var socketChannel = command.Channel as ITextChannel;
+        var embeds = new Embeds();
 
-        if (socketChannel != null && socketChannel.GetChannelType() == ChannelType.PrivateThread)
+        if (socketChannel != null && IsThread(socketChannel))
         {
             var dataController = new Data.DataController();
-            var embeds = new Embeds();
 
             var logs = dataController.GetLogs(command.GuildId?? 0, socketChannel.Id);
 
@@ -103,7 +108,6 @@ public class LogSubCommand
         }
         else
         {
-            var embeds = new Embeds();
             await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
         }
     }
@@ -113,7 +117,7 @@ public class LogSubCommand
 
         var socketChannel = command.Channel as ITextChannel;
 
-        if (socketChannel != null && socketChannel.GetChannelType() == ChannelType.PrivateThread)
+        if (socketChannel != null && IsThread(socketChannel))
         {
             var dataController = new Data.DataController();
             var embeds = new Embeds();
@@ -144,21 +148,22 @@ public class LogSubCommand
         
         switch(subCommand) {
             case "button.back":
-
                 if(page > 0) {
                     await LogRead(component, page - 1);
                 } else {
                     await LogRead(component, page);
                 }
-
                 return;
+
             case "button.forward":
                 await LogRead(component, page + 1);
                 return;
+
             default:
                 var embeds = new Embeds();
                 await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build(), ephemeral: true);
                 return;
+
         }
 
     } 
@@ -167,11 +172,11 @@ public class LogSubCommand
     {
 
         var socketChannel = component.Channel as ITextChannel;
+        var embeds = new Embeds();
 
-        if (socketChannel != null && socketChannel.GetChannelType() == ChannelType.PrivateThread)
+        if (socketChannel != null && IsThread(socketChannel))
         {
             var dataController = new Data.DataController();
-            var embeds = new Embeds();
 
             var logs = dataController.GetLogs(component.GuildId?? 0, socketChannel.Id);
 
@@ -188,7 +193,6 @@ public class LogSubCommand
         }
         else
         {
-            var embeds = new Embeds();
             await component.RespondAsync(embed: embeds.Error("Not a thread.").Build());
         }
     }

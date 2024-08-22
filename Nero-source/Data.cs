@@ -19,9 +19,11 @@ public class Log {
 }
 
 public class Session {
+    public ulong GuildID { get; set; }
     public ulong ChannelID { get; set; }
     public List<Log> Logs { get; set; } = new List<Log>();
-    public Session(ulong channelID) {
+    public Session(ulong guildID, ulong channelID) {
+        GuildID = guildID;
         ChannelID = channelID;
     }
 
@@ -97,7 +99,7 @@ public class DataController {
 
         string fileContents = File.ReadAllText(sessionFilePath);
 
-        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(guildID, channelID);
 
         session.Logs.Add(new Log(authorID, LogMessage));
 
@@ -117,7 +119,7 @@ public class DataController {
 
         string fileContents = File.ReadAllText(sessionFilePath);
 
-        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(guildID, channelID);
         
         var logs = session.Logs;
 
@@ -137,7 +139,7 @@ public class DataController {
 
         string fileContents = File.ReadAllText(sessionFilePath);
 
-        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(guildID, channelID);
         
         var logs = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
 

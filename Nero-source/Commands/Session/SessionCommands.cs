@@ -39,6 +39,9 @@ public class SessionCommand
                 type: ThreadType.PrivateThread
             );
 
+            DataController dataController = new DataController();
+            dataController.CreateLocalFiles(guildID: socketChannel.Guild.Id, channelID: newSession.Id, userID: userId);
+
             string channelMention = $"<#{newSession.Id}>";
 
             await command.RespondAsync($"Session created: {channelMention}");

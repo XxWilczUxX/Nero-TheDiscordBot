@@ -1,4 +1,5 @@
 using System;
+using System.Xml.Linq;
 using Discord;
 using Newtonsoft.Json;
 
@@ -7,16 +8,33 @@ using Newtonsoft.Json;
 namespace Nero.Data;
 
 public class Log {
-    public ulong ChannelID { get; set; }
     public ulong AuthorID { get; set; }
     public string LogMessage { get; set; }
 
-    public Log(ulong channelID, ulong authorID, string logMessage) {
-        ChannelID = channelID;
+    public Log(ulong authorID, string logMessage) {
         AuthorID = authorID;
         LogMessage = logMessage;
     }
 
+}
+
+public class Session {
+    public ulong ChannelID { get; set; }
+    public List<Log> Logs { get; set; } = new List<Log>();
+    public Session(ulong channelID) {
+        ChannelID = channelID;
+    }
+
+    public void Save(string path) {
+        File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
+    }
+    public void Load(string path) {
+        var session = JsonConvert.DeserializeObject<Session>(File.ReadAllText(path));
+        if(session != null) {
+            ChannelID = session.ChannelID;
+            Logs = session.Logs;
+        }
+    }
 }
 
 public class User {
@@ -54,13 +72,14 @@ public class DataController {
         }
 
         foreach (var path in paths) {
-            if(path.EndsWith(".json") == false) {
-                if(Directory.Exists(path) == false) {
-                    Directory.CreateDirectory(path);
-                }
-            } else {
-                if(File.Exists(path) == false) {
+            if(path.EndsWith(".json")){
+                if(!File.Exists(path)) {
                     File.Create(path).Close();
+                }
+            } 
+            else {
+                if(!Directory.Exists(path)) {
+                    Directory.CreateDirectory(path);
                 }
             }
         }
@@ -70,21 +89,19 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
-        if(File.Exists(logFilePath) == false) {
-            File.Create(logFilePath).Close();
+        if(File.Exists(sessionFilePath) == false) {
+            File.Create(sessionFilePath).Close();
         }
 
-        string fileContents = File.ReadAllText(logFilePath);
+        string fileContents = File.ReadAllText(sessionFilePath);
 
-        List<Log> log;
-        
-        log = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
 
-        log.Add(new Log(channelID, authorID, LogMessage));
+        session.Logs.Add(new Log(authorID, LogMessage));
 
-        File.WriteAllText(logFilePath, JsonConvert.SerializeObject(log, Formatting.Indented));
+        File.WriteAllText(sessionFilePath, JsonConvert.SerializeObject(session, Formatting.Indented));
 
     }
 
@@ -92,19 +109,19 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
-        if(File.Exists(logFilePath) == false) {
-            File.Create(logFilePath).Close();
+        if(File.Exists(sessionFilePath) == false) {
+            File.Create(sessionFilePath).Close();
         }
 
-        string fileContents = File.ReadAllText(logFilePath);
+        string fileContents = File.ReadAllText(sessionFilePath);
 
-        List<Log> log;
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
         
-        log = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
+        var logs = session.Logs;
 
-        return log;
+        return logs;
 
     }
 
@@ -112,21 +129,21 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var logFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
-        if(File.Exists(logFilePath) == false) {
-            File.Create(logFilePath).Close();
+        if(File.Exists(sessionFilePath) == false) {
+            File.Create(sessionFilePath).Close();
         }
 
-        string fileContents = File.ReadAllText(logFilePath);
+        string fileContents = File.ReadAllText(sessionFilePath);
 
-        List<Log> log;
+        Session session = JsonConvert.DeserializeObject<Session>(fileContents) ?? new Session(channelID);
         
-        log = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
+        var logs = JsonConvert.DeserializeObject<List<Log>>(fileContents) ?? new List<Log>();
 
-        log.RemoveAt(logIndex);
+        logs.RemoveAt(logIndex);
 
-        File.WriteAllText(logFilePath, JsonConvert.SerializeObject(log, Formatting.Indented));
+        File.WriteAllText(sessionFilePath, JsonConvert.SerializeObject(session, Formatting.Indented));
 
     }
 

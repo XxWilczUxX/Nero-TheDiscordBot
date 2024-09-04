@@ -7,6 +7,28 @@ using Newtonsoft.Json;
 
 namespace Nero.Data;
 
+public class AppData {
+    private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);   
+    public static readonly string botDataPath = Path.Combine(appDataPath, "CPBot");
+
+    public static readonly Settings settings = new Settings();
+}
+
+public class Settings {
+    public int MaxSessionsPerUser { get; } = 5;
+
+    public Settings() {
+        var dataController = new DataController();
+        dataController.CreateLocalFiles();
+        
+        var fileContents = File.ReadAllText(Path.Combine(AppData.botDataPath, "settings", "settings.json"));
+        var settings = JsonConvert.DeserializeObject<Settings>(fileContents);
+        if(settings != null) {
+            MaxSessionsPerUser = settings.MaxSessionsPerUser;
+        }
+    }
+}
+
 public class Log {
     public ulong AuthorID { get; set; }
     public string LogMessage { get; set; }
@@ -28,7 +50,7 @@ public class Session {
     }
 
     public void Save() {
-        var path = Path.Combine(DataController.botDataPath, "guilds", GuildID.ToString(), "sessions", $"{ChannelID}.json");
+        var path = Path.Combine(AppData.botDataPath, "guilds", GuildID.ToString(), "sessions", $"{ChannelID}.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
     }
     public void Load(string path) {
@@ -49,12 +71,12 @@ public class User {
     }
 
     public void Save() {
-        var path = Path.Combine(DataController.botDataPath, "users", $"{UserID}.json");
+        var path = Path.Combine(AppData.botDataPath, "users", $"{UserID}.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
     }
 
     public void Load() {
-        var path = Path.Combine(DataController.botDataPath, "users", $"{UserID}.json");
+        var path = Path.Combine(AppData.botDataPath, "users", $"{UserID}.json");
         if(File.Exists(path) == false) {
             File.Create(path).Close();
         }
@@ -76,11 +98,11 @@ public class User {
     }
 
     public bool CanAddSession() {
-        return Sessions.Count < 5;
+        return Sessions.Count < AppData.settings.MaxSessionsPerUser;
     }
 
     public bool AddSession(ulong sessionID) {
-        if(Sessions.Count >= 5) {
+        if(Sessions.Count >= AppData.settings.MaxSessionsPerUser) {
             return false;
         }
         Sessions.Add(sessionID);
@@ -88,29 +110,28 @@ public class User {
     }
 
 }
-public class DataController { 
 
-    private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);   
-    public static readonly string botDataPath = Path.Combine(appDataPath, "CPBot");
+public class DataController { 
 
     public void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
         var paths = new List<string> {
-            botDataPath,
-            Path.Combine(botDataPath, "settings"),
-            Path.Combine(botDataPath, "guilds"),
-            Path.Combine(botDataPath, "users")
+            AppData.botDataPath,
+            Path.Combine(AppData.botDataPath, "settings"),
+            Path.Combine(AppData.botDataPath, "settings", "settings.json"),
+            Path.Combine(AppData.botDataPath, "guilds"),
+            Path.Combine(AppData.botDataPath, "users")
         };
 
         if(guildID != 0) {
-            paths.Add(Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions"));
+            paths.Add(Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions"));
             
             if(channelID != 0) {
-                paths.Add(Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json"));
+                paths.Add(Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json"));
             }
         }
 
         if(userID != 0) {
-            paths.Add(Path.Combine(botDataPath, "users", $"{userID}.json"));
+            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}.json"));
         }
 
         foreach (var path in paths) {
@@ -131,7 +152,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID, userID);
 
-        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(sessionFilePath) == false) {
             File.Create(sessionFilePath).Close();
@@ -142,7 +163,7 @@ public class DataController {
 
         session.Save();
 
-        var userFilePath = Path.Combine(botDataPath, "users", $"{userID}.json");
+        var userFilePath = Path.Combine(AppData.botDataPath, "users", $"{userID}.json");
 
         if(File.Exists(userFilePath) == false) {
             File.Create(userFilePath).Close();
@@ -159,7 +180,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(sessionFilePath) == false) {
             File.Create(sessionFilePath).Close();
@@ -180,7 +201,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(sessionFilePath) == false) {
             File.Create(sessionFilePath).Close();
@@ -200,7 +221,7 @@ public class DataController {
 
         CreateLocalFiles(guildID, channelID);
 
-        var sessionFilePath = Path.Combine(botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
+        var sessionFilePath = Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
 
         if(File.Exists(sessionFilePath) == false) {
             File.Create(sessionFilePath).Close();

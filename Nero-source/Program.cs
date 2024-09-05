@@ -10,11 +10,7 @@ public class Info
     public string Token { get; set; } = string.Empty;
     public ulong TestplaceID { get; set; }
     public ulong HeadAdminID { get; set; }
-}
-
-public class Settings
-{
-    private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "settings", "settings.json");
+    
 }
 
 public class Names
@@ -28,14 +24,13 @@ public class Names
 
 class Program
 {
-    static void Main()
-        => new Program().MainAsync().GetAwaiter().GetResult();
+    static void Main(string[] args)
+        => new Program().MainAsync(args).GetAwaiter().GetResult();
 
     private DiscordSocketClient _client = new DiscordSocketClient();
     private CommandService _commands = new CommandService();
-    
     private Info info = new Info();
-    public async Task MainAsync()
+    public async Task MainAsync(string[] args)
     {
         var tokenFile = Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json");
 

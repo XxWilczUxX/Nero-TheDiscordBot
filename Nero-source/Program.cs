@@ -5,18 +5,6 @@ using Newtonsoft.Json;
 
 namespace Nero;
 
-public class Info
-{
-    public string Token { get; set; } = string.Empty;
-    public ulong TestplaceID { get; set; }
-    public ulong HeadAdminID { get; set; }
-}
-
-public class Settings
-{
-    private string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "settings", "settings.json");
-}
-
 public class Names
 {
     public readonly string[] stats = { "Inteligence", "Reflex", "Agility", "Technology", "Charisma", "Will", "Luck", "Movement", "Body", "Empathy" };
@@ -28,38 +16,21 @@ public class Names
 
 class Program
 {
-    static void Main()
-        => new Program().MainAsync().GetAwaiter().GetResult();
+    static void Main(string[] args)
+        => new Program().MainAsync(args).GetAwaiter().GetResult();
 
     private DiscordSocketClient _client = new DiscordSocketClient();
     private CommandService _commands = new CommandService();
-    
-    private Info info = new Info();
-    public async Task MainAsync()
+    private Data.Info info = new Data.Info();
+    public async Task MainAsync(string[] args)
     {
-        var tokenFile = Path.Combine(Directory.GetCurrentDirectory(), "Nero-source/json/safe/safe.json");
 
-        if(File.Exists(tokenFile)) {
-            var tokenInfo = File.ReadAllText(tokenFile);
-
-            if(!string.IsNullOrEmpty(tokenInfo)) {
-                var deserializedInfo = JsonConvert.DeserializeObject<Info>(tokenInfo);
-
-                if(deserializedInfo != null) {
-                    info = deserializedInfo;
-                }
-
-            }
-        }
-
-        
-        if (info == null)
+        if(info.Token == string.Empty)
         {
-            info = new Info();
+            Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }
 
         Data.DataController dataController = new Data.DataController();
-
         dataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
@@ -119,7 +90,7 @@ class Program
             case "debug":
                 var debug = new DebugCommands();
 
-                await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client, info);
+                await debug.CommandHandler(command, _client.GetGuild(info.TestplaceID), _client);
                 return;
             case "roll":
                 var rollCommand = new RollCommand().Roll;

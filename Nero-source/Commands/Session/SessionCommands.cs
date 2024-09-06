@@ -30,14 +30,29 @@ public class SessionCommand
 
         var socketChannel = command.Channel as ITextChannel;
 
+        var embeds = new Embeds();
+
         if (socketChannel != null)
         {
+
+            User user = new User(userId);
+            user.Load();
+
+            if(!user.CanAddSession()) {
+                await command.RespondAsync(embed: embeds.Error("You have too many sessions open.").Build());
+                return;
+            }
+
             var newSession = await socketChannel.CreateThreadAsync(
                 name: command.Data.Options.First().Options.First().Value.ToString(),
                 autoArchiveDuration: ThreadArchiveDuration.OneWeek,
                 invitable: true,
                 type: ThreadType.PrivateThread
             );
+
+            DataController dataController = new DataController();
+
+            dataController.SaveSession(command.GuildId?? 0, newSession.Id, userId);
 
             string channelMention = $"<#{newSession.Id}>";
 
@@ -47,7 +62,6 @@ public class SessionCommand
         }
         else
         {
-            var embeds = new Embeds();
             await command.RespondAsync(embed: embeds.Error("Channel Error.").Build());
         }
     }

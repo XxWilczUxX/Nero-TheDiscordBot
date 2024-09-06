@@ -4,7 +4,7 @@ using Discord.WebSocket;
 namespace Nero;
 public class DebugCommands
 {
-    public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client, Info info)
+    public async Task CommandHandler(SocketSlashCommand command, SocketGuild guild, DiscordSocketClient _client)
     {
         switch (command.Data.Options.First().Name)
         {
@@ -31,7 +31,7 @@ public class DebugCommands
                 }
                 break;
             case "shutdown":
-
+                var info = new Data.Info();
                 if(command.User.Id == info.HeadAdminID) {
 
                     var embeds = new Embeds();

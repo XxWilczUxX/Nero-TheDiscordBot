@@ -14,16 +14,65 @@ public class AppData {
     public static readonly Settings settings = new Settings();
 }
 
-public class Settings {
-    public int MaxSessionsPerUser { get; } = 5;
+public static class DataHelper
+{
+    public static T? LoadData<T>(string filePath) where T : class
+    {
+        try
+        {
+            var fileContents = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<T>(fileContents);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+            return null;
+        }
+    }
+}
 
-    public Settings() {
+public class Info
+{
+    public string Token { get; private set; } = string.Empty;
+    public ulong TestplaceID { get; }
+    public ulong HeadAdminID { get; }
+
+    public Info()
+    {
         var dataController = new DataController();
         dataController.CreateLocalFiles();
-        
-        var fileContents = File.ReadAllText(Path.Combine(AppData.botDataPath, "settings", "settings.json"));
-        var settings = JsonConvert.DeserializeObject<Settings>(fileContents);
-        if(settings != null) {
+
+        var filePath = Path.Combine(AppData.botDataPath, "settings", "token.json");
+        var deserializedInfo = DataHelper.LoadData<DeserializedInfo>(filePath);
+        if (deserializedInfo != null)
+        {
+            Token = deserializedInfo.Token;
+            TestplaceID = deserializedInfo.TestplaceID;
+            HeadAdminID = deserializedInfo.HeadAdminID;
+        }
+    }
+
+    private class DeserializedInfo
+    {
+        public string Token { get; set; } = string.Empty;
+        public ulong TestplaceID { get; set; }
+        public ulong HeadAdminID { get; set; }
+    }
+}
+
+public class Settings
+{
+    public int MaxSessionsPerUser { get; } = 5;
+
+    public Settings()
+    {
+        var dataController = new DataController();
+        dataController.CreateLocalFiles();
+
+        var filePath = Path.Combine(AppData.botDataPath, "settings", "settings.json");
+        var settings = DataHelper.LoadData<Settings>(filePath);
+        if (settings != null)
+        {
             MaxSessionsPerUser = settings.MaxSessionsPerUser;
         }
     }
@@ -118,6 +167,7 @@ public class DataController {
             AppData.botDataPath,
             Path.Combine(AppData.botDataPath, "settings"),
             Path.Combine(AppData.botDataPath, "settings", "settings.json"),
+            Path.Combine(AppData.botDataPath, "settings", "token.json"),
             Path.Combine(AppData.botDataPath, "guilds"),
             Path.Combine(AppData.botDataPath, "users")
         };

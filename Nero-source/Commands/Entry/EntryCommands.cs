@@ -1,7 +1,5 @@
-using System.ComponentModel;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.VisualBasic;
 
 namespace Nero;
 

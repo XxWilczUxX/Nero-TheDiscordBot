@@ -1,9 +1,5 @@
-using System;
-using System.Xml.Linq;
-using Discord;
 using Newtonsoft.Json;
 
-// The data here needs to be standardized for saving and loading with future easier implementation of new things that will need to be saved. (I dont know yet how exacly this should look but i want this on json because i can't afford a database)
 
 namespace Nero.Data;
 
@@ -62,7 +58,7 @@ public class Info
 
 public class Settings
 {
-    public int MaxSessionsPerUser { get; } = 5;
+    public int MaxSessionsPerUser { get; private set; } = 5;
 
     public Settings()
     {

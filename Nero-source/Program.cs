@@ -33,6 +33,8 @@ class Program
             Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }
 
+        var character = new Data.Character.Character("Test");
+
         await _client.LoginAsync(TokenType.Bot, Token);
         await _client.StartAsync();
 

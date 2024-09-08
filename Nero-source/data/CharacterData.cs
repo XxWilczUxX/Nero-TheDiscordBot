@@ -24,10 +24,16 @@ public class Skill
     public string Name { get; private set; } = string.Empty;
     public List<Skill>? Subskills { get; private set; }
     public byte Level { get; private set; } = 0;
+    public byte Cost { get; private set; } = 1;
 
     public Skill(string name)
     {
         Name = name;
+    }
+    public Skill(string name, byte cost)
+    {
+        Name = name;
+        Cost = cost;
     }
 
     public void AddSubskill(string subskill_name)
@@ -78,6 +84,27 @@ public class Character
     public Character(string name)
     {
         Name = name;
+
+        foreach(string stat_name in DefaultNames.Stats)
+        {
+            Stats.Add(new Stat(stat_name));
+        }
+        for(byte i = 0; i < DefaultNames.Skills.GetLength(1)*2; i++)
+        {
+            if(i < DefaultNames.Skills.GetLength(1))
+            {
+                Skills.Add(new Skill(DefaultNames.Skills[0, i]));
+                //Console.WriteLine($"Added skill: {Skills.Last().Name}");
+            }
+            else
+            {
+                if(DefaultNames.Skills[1, i-DefaultNames.Skills.GetLength(1)] != "")
+                {
+                    Skills.ElementAt(i-DefaultNames.Skills.GetLength(1)).AddSubskill(DefaultNames.Skills[1, i-DefaultNames.Skills.GetLength(1)]); 
+                    //Console.WriteLine($"Added subskill: {Skills.ElementAt(i-DefaultNames.Skills.GetLength(1)).Subskills?.Last().Name}");   
+                }
+            }
+        }
     }
 
 

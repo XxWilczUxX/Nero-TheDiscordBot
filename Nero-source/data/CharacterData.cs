@@ -62,9 +62,9 @@ public class Role
         Name = "Unassigned";
     }
 
-    public Role(string name)
+    public Role(byte role_id)
     {
-        Name = name;
+        Name = DefaultNames.Roles[role_id];
     }
 
     public void SetLevel(byte level)
@@ -81,9 +81,14 @@ public class Character
     public Role Role { get; private set; } = new Role();
     public int Experience { get; private set; } = 0;
     
-    public Character(string name)
+    public Character(string name, byte role_id = 255)
     {
         Name = name;
+
+        if(role_id != 255)
+        {
+            Role = new Role(role_id);
+        }
 
         foreach(string stat_name in DefaultNames.Stats)
         {

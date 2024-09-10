@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Reflection;
 
 namespace Nero;
 
@@ -53,19 +54,39 @@ class Program
 
         var commandBuilders = new CommandBuilders();
 
-        var guildCommand = commandBuilders.Session;
+        var slashCommandBuilders = GetSlashCommandBuilders(commandBuilders);
 
-        try
+        foreach(var builder in slashCommandBuilders)
         {
-            await guild.CreateApplicationCommandAsync(guildCommand.Build());
-        }
-        catch (Exception ex)
-        {
-
-            Console.WriteLine(ex.Message);
+            try
+            {
+                Console.WriteLine("Registering command: " + builder.Name);
+                await guild.CreateApplicationCommandAsync(builder.Build());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         _client.SlashCommandExecuted += SlashCommandHandler;
+    }
+
+    public List<SlashCommandBuilder> GetSlashCommandBuilders(CommandBuilders commandBuilders) // TBH i have no idea how this works, but it does.
+    {
+        var properties = commandBuilders.GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(prop => prop.PropertyType == typeof(SlashCommandBuilder))
+            .Select(prop => prop.GetValue(commandBuilders) as SlashCommandBuilder);
+
+        var fields = commandBuilders.GetType()
+            .GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(field => field.FieldType == typeof(SlashCommandBuilder))
+            .Select(field => field.GetValue(commandBuilders) as SlashCommandBuilder);
+
+        return properties.Concat(fields)
+            .Where(builder => builder != null)
+            .ToList()!;
     }
 
     private async Task SlashCommandHandler(SocketSlashCommand command)

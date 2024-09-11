@@ -165,7 +165,8 @@ public class DataController {
             Path.Combine(AppData.botDataPath, "settings", "settings.json"),
             Path.Combine(AppData.botDataPath, "settings", "token.json"),
             Path.Combine(AppData.botDataPath, "guilds"),
-            Path.Combine(AppData.botDataPath, "users")
+            Path.Combine(AppData.botDataPath, "users"),
+            Path.Combine(AppData.botDataPath, "users", "characters")
         };
 
         if(guildID != 0) {

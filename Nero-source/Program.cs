@@ -110,6 +110,11 @@ class Program
 
                 await sessionCommandHandler(command);
                 return;
+            case "character":
+                var characterCommandHandler = new CharacterCommand().CommandHandler;
+
+                await characterCommandHandler(command);
+                return;
             default:
                 var embeds = new Embeds();
 

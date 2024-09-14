@@ -104,11 +104,11 @@ public class DataController {
         };
 
         if (guildID != 0) {
-            var guildPath = Path.Combine(paths.ElementAt(2), guildID.ToString());
+            var guildPath = Path.Combine(paths.ElementAt(2), guildID.ToString(), "sessions");
             paths.Add(guildPath);
 
             if (channelID != 0) {
-                files.Add(Path.Combine(guildPath, "sessions", $"{channelID}.json"));
+                files.Add(Path.Combine(guildPath, $"{channelID}.json"));
             }
         }
 
@@ -116,7 +116,7 @@ public class DataController {
             var userPath = Path.Combine(paths.ElementAt(3), $"{userID}");
             paths.Add(userPath);
             paths.Add(Path.Combine(userPath, "characters"));
-            files.Add(Path.Combine(userPath, $"{userID}.json"));
+            files.Add(Path.Combine(userPath, $"user.json"));
         }
 
         foreach (var path in paths) {
@@ -143,7 +143,7 @@ public class DataController {
 
         session.Save();
 
-        var userFilePath = Path.Combine(AppData.botDataPath, "users", $"{userID}.json");
+        var userFilePath = Path.Combine(AppData.botDataPath, "users", $"{userID}", "user.json");
 
         if(File.Exists(userFilePath) == false) {
             File.Create(userFilePath).Close();

@@ -30,7 +30,7 @@ public class User {
         if(File.Exists(Path.Combine(path, "user.json")) == false) {
             File.Create(Path.Combine(path, "user.json")).Close();
         }
-        var user = JsonConvert.DeserializeObject<User>(File.ReadAllText(path));
+        var user = JsonConvert.DeserializeObject<User>(File.ReadAllText(Path.Combine(path, "user.json")));
         if(user != null) {
             Sessions = user.Sessions;
         }

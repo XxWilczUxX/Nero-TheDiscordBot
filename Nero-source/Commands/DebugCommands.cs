@@ -31,8 +31,8 @@ public class DebugCommands
                 }
                 break;
             case "shutdown":
-                var info = new Data.Info();
-                if(command.User.Id == info.HeadAdminID) {
+                var secret = new Data.Secret();
+                if(command.User.Id == secret.HeadAdminID) {
 
                     var embeds = new Embeds();
                     await command.RespondAsync("",embed: embeds.Info("Shutdown", "The bot has been shut down.").Build())

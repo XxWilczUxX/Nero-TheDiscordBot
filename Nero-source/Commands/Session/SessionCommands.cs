@@ -1,6 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 using Nero.Data;
+using Nero.Data.UserData;
 
 namespace Nero;
 

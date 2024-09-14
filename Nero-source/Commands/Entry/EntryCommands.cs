@@ -27,7 +27,7 @@ public class LogSubCommand
 
     }  
 
-    private MessageComponent createComponents(List<Data.Log> logs, int page) {
+    private MessageComponent createComponents(List<Data.SessionData.Log> logs, int page) {
 
         Console.WriteLine(logs.Count);
 

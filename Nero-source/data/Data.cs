@@ -40,7 +40,7 @@ public class Secret
         dataController.CreateLocalFiles();
 
         var filePath = Path.Combine(AppData.botDataPath, "settings", "token.json");
-        var deserializedInfo = DataHelper.LoadData<DeserializedInfo>(filePath);
+        var deserializedInfo = DataHelper.LoadData<DeserializedSecret>(filePath);
         if (deserializedInfo != null)
         {
             Token = deserializedInfo.Token;
@@ -49,7 +49,7 @@ public class Secret
         }
     }
 
-    private class DeserializedInfo
+    private class DeserializedSecret
     {
         public string Token { get; set; } = string.Empty;
         public ulong TestplaceID { get; set; }
@@ -79,40 +79,52 @@ public class Settings
 
 public class DataController { 
 
+    private void EnsureDirectoryExists(string path) {
+        if(Directory.Exists(path) == false) {
+            Directory.CreateDirectory(path);
+        }
+    }
+    private void EnsureFileExists(string path) {
+        if(File.Exists(path) == false) {
+            File.Create(path).Close();
+        }
+    }
+
     public void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
         var paths = new List<string> {
             AppData.botDataPath,
             Path.Combine(AppData.botDataPath, "settings"),
-            Path.Combine(AppData.botDataPath, "settings", "settings.json"),
-            Path.Combine(AppData.botDataPath, "settings", "token.json"),
             Path.Combine(AppData.botDataPath, "guilds"),
             Path.Combine(AppData.botDataPath, "users"),
         };
 
-        if(guildID != 0) {
-            paths.Add(Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions"));
-            
-            if(channelID != 0) {
-                paths.Add(Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json"));
+        var files = new List<string> {
+            Path.Combine(paths.ElementAt(1), "settings.json"),
+            Path.Combine(paths.ElementAt(1), "token.json"),
+        };
+
+        if (guildID != 0) {
+            var guildPath = Path.Combine(paths.ElementAt(2), guildID.ToString());
+            paths.Add(guildPath);
+
+            if (channelID != 0) {
+                files.Add(Path.Combine(guildPath, "sessions", $"{channelID}.json"));
             }
         }
 
-        if(userID != 0) {
-            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}", $"{userID}.json"));
-            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}", "characters"));
+        if (userID != 0) {
+            var userPath = Path.Combine(paths.ElementAt(3), $"{userID}");
+            paths.Add(userPath);
+            paths.Add(Path.Combine(userPath, "characters"));
+            files.Add(Path.Combine(userPath, $"{userID}.json"));
         }
 
         foreach (var path in paths) {
-            if(path.EndsWith(".json")){
-                if(!File.Exists(path)) {
-                    File.Create(path).Close();
-                }
-            } 
-            else {
-                if(!Directory.Exists(path)) {
-                    Directory.CreateDirectory(path);
-                }
-            }
+            EnsureDirectoryExists(path);
+        }
+
+        foreach (var file in files) {
+            EnsureFileExists(file);
         }
     }
 

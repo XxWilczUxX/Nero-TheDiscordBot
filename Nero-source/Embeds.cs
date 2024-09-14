@@ -56,7 +56,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Log(List<Data.Log> log, int page = 1) 
+    public EmbedBuilder Log(List<Data.SessionData.Log> log, int page = 1) 
     {
 
         var embed = new EmbedBuilder()

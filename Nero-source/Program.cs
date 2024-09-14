@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Reflection;
+using Nero.Data;
 
 namespace Nero;
 
@@ -12,11 +13,11 @@ class Program
 
     private DiscordSocketClient _client = new DiscordSocketClient();
     private CommandService _commands = new CommandService();
-    private Data.Info info = new Data.Info();
+    private Secret info = new Secret();
     public async Task MainAsync(string[] args)
     {
 
-        Data.DataController dataController = new Data.DataController();
+        DataController dataController = new DataController();
         dataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
@@ -33,8 +34,6 @@ class Program
         {
             Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }
-
-        var character = new Data.Character.Character("Test");
 
         await _client.LoginAsync(TokenType.Bot, Token);
         await _client.StartAsync();

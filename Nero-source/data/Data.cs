@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
-
+using Nero.Data.SessionData;
+using Nero.Data.UserData;
 
 namespace Nero.Data;
 
@@ -27,13 +28,13 @@ public static class DataHelper
     }
 }
 
-public class Info
+public class Secret
 {
     public string Token { get; private set; } = string.Empty;
     public ulong TestplaceID { get; }
     public ulong HeadAdminID { get; }
 
-    public Info()
+    public Secret()
     {
         var dataController = new DataController();
         dataController.CreateLocalFiles();
@@ -59,6 +60,7 @@ public class Info
 public class Settings
 {
     public int MaxSessionsPerUser { get; private set; } = 5;
+    public int MaxCharactersPerUser { get; private set; } = 5;
 
     public Settings()
     {
@@ -70,90 +72,9 @@ public class Settings
         if (settings != null)
         {
             MaxSessionsPerUser = settings.MaxSessionsPerUser;
+            MaxCharactersPerUser = settings.MaxCharactersPerUser;
         }
     }
-}
-
-public class Log {
-    public ulong AuthorID { get; set; }
-    public string LogMessage { get; set; }
-
-    public Log(ulong authorID, string logMessage) {
-        AuthorID = authorID;
-        LogMessage = logMessage;
-    }
-
-}
-
-public class Session {
-    public ulong GuildID { get; set; }
-    public ulong ChannelID { get; set; }
-    public List<Log> Logs { get; set; } = new List<Log>();
-    public Session(ulong guildID, ulong channelID) {
-        GuildID = guildID;
-        ChannelID = channelID;
-    }
-
-    public void Save() {
-        var path = Path.Combine(AppData.botDataPath, "guilds", GuildID.ToString(), "sessions", $"{ChannelID}.json");
-        File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
-    }
-    public void Load(string path) {
-        var session = JsonConvert.DeserializeObject<Session>(File.ReadAllText(path));
-        if(session != null) {
-            ChannelID = session.ChannelID;
-            Logs = session.Logs;
-        }
-    }
-}
-
-public class User {
-    public ulong UserID { get; set; }
-    private List<ulong> Sessions { get; set; } = new List<ulong>();
-
-    public User(ulong userID) {
-        UserID = userID;
-    }
-
-    public void Save() {
-        var path = Path.Combine(AppData.botDataPath, "users", $"{UserID}.json");
-        File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
-    }
-
-    public void Load() {
-        var path = Path.Combine(AppData.botDataPath, "users", $"{UserID}.json");
-        if(File.Exists(path) == false) {
-            File.Create(path).Close();
-        }
-        var user = JsonConvert.DeserializeObject<User>(File.ReadAllText(path));
-        if(user != null) {
-            Sessions = user.Sessions;
-        }
-    }
-
-    public void Load(string path) {
-        if(File.Exists(path) == false) {
-            File.Create(path).Close();
-        }
-        var user = JsonConvert.DeserializeObject<User>(File.ReadAllText(path));
-        if(user != null) {
-            UserID = user.UserID;
-            Sessions = user.Sessions;
-        }
-    }
-
-    public bool CanAddSession() {
-        return Sessions.Count < AppData.settings.MaxSessionsPerUser;
-    }
-
-    public bool AddSession(ulong sessionID) {
-        if(Sessions.Count >= AppData.settings.MaxSessionsPerUser) {
-            return false;
-        }
-        Sessions.Add(sessionID);
-        return true;
-    }
-
 }
 
 public class DataController { 
@@ -166,7 +87,6 @@ public class DataController {
             Path.Combine(AppData.botDataPath, "settings", "token.json"),
             Path.Combine(AppData.botDataPath, "guilds"),
             Path.Combine(AppData.botDataPath, "users"),
-            Path.Combine(AppData.botDataPath, "users", "characters")
         };
 
         if(guildID != 0) {
@@ -178,7 +98,8 @@ public class DataController {
         }
 
         if(userID != 0) {
-            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}.json"));
+            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}", $"{userID}.json"));
+            paths.Add(Path.Combine(AppData.botDataPath, "users", $"{userID}", "characters"));
         }
 
         foreach (var path in paths) {

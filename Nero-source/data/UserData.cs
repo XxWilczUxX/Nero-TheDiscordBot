@@ -23,6 +23,8 @@ public class User {
     }
 
     public void Load() {
+        DataController.CreateLocalFiles();
+
         var path = GetUserPath(UserID);
         if(Directory.Exists(path) == false) {
             Directory.CreateDirectory(path);

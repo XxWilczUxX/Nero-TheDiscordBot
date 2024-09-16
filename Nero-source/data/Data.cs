@@ -35,8 +35,7 @@ public class Secret
 
     public Secret()
     {
-        var dataController = new DataController();
-        dataController.CreateLocalFiles();
+        DataController.CreateLocalFiles();
 
         var filePath = Path.Combine(AppData.botDataPath, "settings", "token.json");
         var deserializedInfo = DataHelper.LoadData<DeserializedSecret>(filePath);
@@ -63,8 +62,7 @@ public class Settings
 
     public Settings()
     {
-        var dataController = new DataController();
-        dataController.CreateLocalFiles();
+        DataController.CreateLocalFiles();
 
         var filePath = Path.Combine(AppData.botDataPath, "settings", "settings.json");
         var settings = DataHelper.LoadData<Settings>(filePath);
@@ -78,18 +76,18 @@ public class Settings
 
 public class DataController { 
 
-    private void EnsureDirectoryExists(string path) {
+    private static void EnsureDirectoryExists(string path) {
         if(Directory.Exists(path) == false) {
             Directory.CreateDirectory(path);
         }
     }
-    private void EnsureFileExists(string path) {
+    private static void EnsureFileExists(string path) {
         if(File.Exists(path) == false) {
             File.Create(path).Close();
         }
     }
 
-    public void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
+    public static void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
         var paths = new List<string> {
             AppData.botDataPath,
             Path.Combine(AppData.botDataPath, "settings"),

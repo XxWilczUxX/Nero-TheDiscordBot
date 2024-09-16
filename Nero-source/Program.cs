@@ -16,9 +16,7 @@ class Program
     private Secret info = new Secret();
     public async Task MainAsync(string[] args)
     {
-
-        DataController dataController = new DataController();
-        dataController.CreateLocalFiles();
+        DataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
         _commands = new CommandService();

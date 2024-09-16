@@ -23,6 +23,8 @@ public class Session {
     }
 
     public void Save() {
+        DataController.CreateLocalFiles();
+
         var path = Path.Combine(AppData.botDataPath, "guilds", GuildID.ToString(), "sessions", $"{ChannelID}.json");
         File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
     }

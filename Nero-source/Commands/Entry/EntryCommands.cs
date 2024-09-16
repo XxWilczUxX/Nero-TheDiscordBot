@@ -1,5 +1,6 @@
 using Discord;
 using Discord.WebSocket;
+using Nero.Data.SessionData;
 
 namespace Nero;
 
@@ -56,86 +57,94 @@ public class LogSubCommand
 
     private async Task LogCreate(SocketSlashCommand command)
     {
-        var userId = command.User.Id;
+        var embeds = new Embeds();
 
+        var guildId = command.GuildId ?? 0;
         var socketChannel = command.Channel as ITextChannel;
 
-        if (socketChannel != null && IsThread(socketChannel))
-        {
-            var dataController = new Data.DataController();
-            var embeds = new Embeds();
-
-            var logMessage = command.Data.Options.First().Options.First().Options.First().Value.ToString();
-
-            if (!string.IsNullOrEmpty(logMessage))
-            {
-                dataController.SaveLog(command.GuildId ?? 0, socketChannel.Id, userId, logMessage);
-
-                var logs = dataController.GetLogs(command.GuildId ?? 0, socketChannel.Id);
-                var embed = embeds.Log(logs, logs.Count / 25).Build();
-
-                await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
-            }
-            else
-            {
-                await command.RespondAsync(embed: embeds.Error("No message provided.").Build());
-            }
+        if(socketChannel == null || guildId == 0) {
+            throw new Exception("Channel is null.");
+        } else if(!IsThread(socketChannel)) {
+            throw new Exception("Not a thread.");
         }
-        else
-        {
-            var embeds = new Embeds();
-            await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+
+        
+        var logMessage = command.Data.Options.First().Options.First().Options.First().Value.ToString();
+
+        if (string.IsNullOrEmpty(logMessage)) {
+            throw new Exception("No message provided.");
         }
+
+        Session session = new Session(guildId, socketChannel.Id);
+        session.Load();
+
+        var logs = session.Logs;
+
+        logs.Add(new Log(command.User.Id, logMessage));
+        session.Logs = logs;
+
+        session.Save();
+
+        var embed = embeds.Log(logs, logs.Count / 25).Build();
+
+        await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
     }
 
     private async Task LogRead(SocketSlashCommand command)
     {
-
-        var socketChannel = command.Channel as ITextChannel;
         var embeds = new Embeds();
 
-        if (socketChannel != null && IsThread(socketChannel))
-        {
-            var dataController = new Data.DataController();
+        var guildId = command.GuildId ?? 0;
+        var socketChannel = command.Channel as ITextChannel;
 
-            var logs = dataController.GetLogs(command.GuildId?? 0, socketChannel.Id);
-
-            var embed = embeds.Log(logs).Build();
-
-            await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
+        if(socketChannel == null || guildId == 0) {
+            throw new Exception("Channel is null.");
+        } else if(!IsThread(socketChannel)) {
+            throw new Exception("Not a thread.");
         }
-        else
-        {
-            await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
-        }
+
+        Session session = new Session(guildId, socketChannel.Id);
+        session.Load();
+
+        var logs = session.Logs;
+        var embed = embeds.Log(logs).Build();
+
+        await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
+
     }
 
     private async Task LogDelete(SocketSlashCommand command) 
     {
+        var embeds = new Embeds();
 
+        var guildId = command.GuildId ?? 0;
         var socketChannel = command.Channel as ITextChannel;
 
-        if (socketChannel != null && IsThread(socketChannel))
-        {
-            var dataController = new Data.DataController();
-            var embeds = new Embeds();
-
-            var input = command.Data.Options.First().Options.First().Options.First().Value.ToString();
-            var logIndex = int.Parse(input?? "-1") - 1;
-
-            if(logIndex >= 0) {
-                dataController.DeleteLog(command.GuildId?? 0, socketChannel.Id, logIndex);
-
-                await command.RespondAsync(embed: embeds.Log(dataController.GetLogs(command.GuildId?? 0, socketChannel.Id)).Build());
-            } else {
-                await command.RespondAsync(embed: embeds.Error("No index provided.").Build());
-            }
+        if(socketChannel == null || guildId == 0) {
+            throw new Exception("Channel is null.");
+        } else if(!IsThread(socketChannel)) {
+            throw new Exception("Not a thread.");
         }
-        else
-        {
-            var embeds = new Embeds();
-            await command.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+
+        var dataController = new Data.DataController();
+
+        var input = command.Data.Options.First().Options.First().Options.First().Value.ToString();
+        var logIndex = int.Parse(input?? "-1") - 1;
+
+        if(logIndex < 0) {
+            throw new Exception("Invalid log index.");   
         }
+
+        Session session = new Session(guildId, socketChannel.Id);
+        session.Load();
+
+        var logs = session.Logs;
+        logs.RemoveAt(logIndex);
+
+        session.Save();
+
+        await command.RespondAsync(embed: embeds.Log(logs).Build());
+
 
     }
 
@@ -168,33 +177,37 @@ public class LogSubCommand
 
     private async Task LogRead(SocketMessageComponent component, int page)
     {
-
-        var socketChannel = component.Channel as ITextChannel;
         var embeds = new Embeds();
 
-        if (socketChannel != null && IsThread(socketChannel))
-        {
-            var dataController = new Data.DataController();
-
-            var logs = dataController.GetLogs(component.GuildId?? 0, socketChannel.Id);
-
-            if(logs.Count / 25 + 1 <= page) {
-                page = logs.Count / 25;
-            }
-
-            var embed = embeds.Log(logs, page).Build();
-
-            await component.UpdateAsync(msg => {
-                msg.Embeds = new[] { embed };
-                msg.Components = new Optional<MessageComponent>(createComponents(logs, page));
-            });
+        var guildId = component.GuildId ?? 0;   
+        var socketChannel = component.Channel as ITextChannel;
+        
+        if(socketChannel == null || guildId == 0) {
+            throw new Exception("Channel is null.");
+        } else if(!IsThread(socketChannel)) {
+            throw new Exception("Not a thread.");
         }
-        else
-        {
-            await component.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+
+        Session session = new Session(component.GuildId?? 0, socketChannel.Id);
+        session.Load();
+
+        var logs = session.Logs;
+
+        if(logs.Count / 25 + 1 <= page) {
+            page = logs.Count / 25;
         }
+
+        var embed = embeds.Log(logs, page).Build();
+
+        await component.UpdateAsync(msg => {
+            msg.Embeds = new[] { embed };
+            msg.Components = new Optional<MessageComponent>(createComponents(logs, page));
+        });
+
+
+        await component.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+
     }
-
 
 
 }

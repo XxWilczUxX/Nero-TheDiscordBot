@@ -20,8 +20,7 @@ public class SessionCommand
                 await LogCommands.LogHandler(command, command.Data.Options.First().Options.First().Name);
                 return;
             default:
-                var embeds = new Embeds();
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }
@@ -31,8 +30,6 @@ public class SessionCommand
         var userId = command.User.Id;
 
         var socketChannel = command.Channel as ITextChannel;
-
-        var embeds = new Embeds();
 
         if (socketChannel != null)
         {
@@ -57,7 +54,7 @@ public class SessionCommand
             }
             catch (Exception ex)
             {
-                await command.RespondAsync(embed: embeds.Error(ex.Message).Build());
+                await command.RespondAsync(embed: Embeds.Error(ex.Message).Build());
                 return;
             }
 
@@ -69,7 +66,7 @@ public class SessionCommand
         }
         else
         {
-            await command.RespondAsync(embed: embeds.Error("Channel Error.").Build());
+            await command.RespondAsync(embed: Embeds.Error("Channel Error.").Build());
         }
     }
 

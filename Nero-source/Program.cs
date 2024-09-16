@@ -113,9 +113,8 @@ class Program
                 await characterCommandHandler(command);
                 return;
             default:
-                var embeds = new Embeds();
 
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }
@@ -133,8 +132,7 @@ class Program
                 await logCommands.LogHandler(component, idParts[1], int.Parse(idParts[2]));
                 return;
             default:
-                var embeds = new Embeds();
-                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await component.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }

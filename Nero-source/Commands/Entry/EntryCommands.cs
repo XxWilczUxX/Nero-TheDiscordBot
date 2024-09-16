@@ -21,8 +21,7 @@ public class LogSubCommand
                 await LogDelete(command);
                 return;
             default:
-                var embeds = new Embeds();
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
 
@@ -57,7 +56,6 @@ public class LogSubCommand
 
     private async Task LogCreate(SocketSlashCommand command)
     {
-        var embeds = new Embeds();
 
         var guildId = command.GuildId ?? 0;
         var socketChannel = command.Channel as ITextChannel;
@@ -85,14 +83,13 @@ public class LogSubCommand
 
         session.Save();
 
-        var embed = embeds.Log(logs, logs.Count / 25).Build();
+        var embed = Embeds.Log(logs, logs.Count / 25).Build();
 
         await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
     }
 
     private async Task LogRead(SocketSlashCommand command)
     {
-        var embeds = new Embeds();
 
         var guildId = command.GuildId ?? 0;
         var socketChannel = command.Channel as ITextChannel;
@@ -107,7 +104,7 @@ public class LogSubCommand
         session.Load();
 
         var logs = session.Logs;
-        var embed = embeds.Log(logs).Build();
+        var embed = Embeds.Log(logs).Build();
 
         await command.RespondAsync(embed: embed, components: createComponents(logs, 0));
 
@@ -115,7 +112,6 @@ public class LogSubCommand
 
     private async Task LogDelete(SocketSlashCommand command) 
     {
-        var embeds = new Embeds();
 
         var guildId = command.GuildId ?? 0;
         var socketChannel = command.Channel as ITextChannel;
@@ -143,7 +139,7 @@ public class LogSubCommand
 
         session.Save();
 
-        await command.RespondAsync(embed: embeds.Log(logs).Build());
+        await command.RespondAsync(embed: Embeds.Log(logs).Build());
 
 
     }
@@ -167,8 +163,7 @@ public class LogSubCommand
                 return;
 
             default:
-                var embeds = new Embeds();
-                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build(), ephemeral: true);
+                await component.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build(), ephemeral: true);
                 return;
 
         }
@@ -177,7 +172,6 @@ public class LogSubCommand
 
     private async Task LogRead(SocketMessageComponent component, int page)
     {
-        var embeds = new Embeds();
 
         var guildId = component.GuildId ?? 0;   
         var socketChannel = component.Channel as ITextChannel;
@@ -197,7 +191,7 @@ public class LogSubCommand
             page = logs.Count / 25;
         }
 
-        var embed = embeds.Log(logs, page).Build();
+        var embed = Embeds.Log(logs, page).Build();
 
         await component.UpdateAsync(msg => {
             msg.Embeds = new[] { embed };
@@ -205,7 +199,7 @@ public class LogSubCommand
         });
 
 
-        await component.RespondAsync(embed: embeds.Error("Not a thread.").Build());
+        await component.RespondAsync(embed: Embeds.Error("Not a thread.").Build());
 
     }
 

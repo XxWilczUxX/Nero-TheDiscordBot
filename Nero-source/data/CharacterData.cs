@@ -1,7 +1,8 @@
 using Nero.Data.GameData;
+using Newtonsoft.Json;
 
 
-namespace Nero.Data.Character;
+namespace Nero.Data.CharacterData;
 
 public class Stat
 {
@@ -111,7 +112,7 @@ public class Character
             }
         }
     }
-
+    
 
     private byte getStatIndex(string stat_name)
     {

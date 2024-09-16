@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Reflection;
+using Nero.Data;
 
 namespace Nero;
 
@@ -12,12 +13,10 @@ class Program
 
     private DiscordSocketClient _client = new DiscordSocketClient();
     private CommandService _commands = new CommandService();
-    private Data.Info info = new Data.Info();
+    private Secret info = new Secret();
     public async Task MainAsync(string[] args)
     {
-
-        Data.DataController dataController = new Data.DataController();
-        dataController.CreateLocalFiles();
+        DataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
         _commands = new CommandService();
@@ -33,8 +32,6 @@ class Program
         {
             Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }
-
-        var character = new Data.Character.Character("Test");
 
         await _client.LoginAsync(TokenType.Bot, Token);
         await _client.StartAsync();
@@ -116,9 +113,8 @@ class Program
                 await characterCommandHandler(command);
                 return;
             default:
-                var embeds = new Embeds();
 
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }
@@ -136,8 +132,7 @@ class Program
                 await logCommands.LogHandler(component, idParts[1], int.Parse(idParts[2]));
                 return;
             default:
-                var embeds = new Embeds();
-                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await component.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }

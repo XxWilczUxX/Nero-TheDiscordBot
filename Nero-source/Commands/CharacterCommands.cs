@@ -20,9 +20,8 @@ namespace Nero
                     await ListCharacters(command);
                     break;
                 default:
-                    var embeds = new Embeds();
 
-                    await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                    await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                     break;
             }
         }

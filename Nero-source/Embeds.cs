@@ -2,9 +2,9 @@ using Discord;
 
 namespace Nero;
 
-public class Embeds
+public static class Embeds
 {
-    public EmbedBuilder Error(string errorMessage)
+    public static EmbedBuilder Error(string errorMessage)
     {
         var embed = new EmbedBuilder()
             .WithTitle("Error")
@@ -15,7 +15,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Info(string title, string infoMessage)
+    public static EmbedBuilder Info(string title, string infoMessage)
     {
         var embed = new EmbedBuilder()
             .WithTitle(title)
@@ -26,7 +26,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder DebugExecuted()
+    public static EmbedBuilder DebugExecuted()
     {
         var embed = new EmbedBuilder()
             .WithTitle("Done")
@@ -36,7 +36,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Rolls(int dice, int[] rolls)
+    public static EmbedBuilder Rolls(int dice, int[] rolls)
     {
         var embed = new EmbedBuilder()
             .WithTitle($"Rolled D{dice}, {rolls.Length} times:\n\nSum: {rolls.Sum()} out of {dice*rolls.Length}")
@@ -56,7 +56,7 @@ public class Embeds
         return embed;
     }
 
-    public EmbedBuilder Log(List<Data.Log> log, int page = 1) 
+    public static EmbedBuilder Log(List<Data.SessionData.Log> log, int page = 1) 
     {
 
         var embed = new EmbedBuilder()

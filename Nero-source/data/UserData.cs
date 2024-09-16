@@ -51,12 +51,11 @@ public class User {
         return Sessions.Count < AppData.settings.MaxSessionsPerUser;
     }
 
-    public bool AddSession(ulong sessionID) {
+    public void AddSession(ulong sessionID) {
         if(Sessions.Count >= AppData.settings.MaxSessionsPerUser) {
-            return false;
+            throw new Exception("User has reached the maximum number of sessions.");
         }
         Sessions.Add(sessionID);
-        return true;
     }
 
     public static List<Character> getCharacters(ulong userID)

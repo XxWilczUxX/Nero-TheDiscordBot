@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using Nero.Data.SessionData;
-using Nero.Data.UserData;
 
 namespace Nero.Data;
 
@@ -126,34 +125,6 @@ public class DataController {
         foreach (var file in files) {
             EnsureFileExists(file);
         }
-    }
-
-    public void SaveSession(ulong guildID, ulong channelID, ulong userID) {
-
-        CreateLocalFiles(guildID, channelID, userID);
-
-        var sessionFilePath = Path.Combine(AppData.botDataPath, "guilds", guildID.ToString(), "sessions", $"{channelID}.json");
-
-        if(File.Exists(sessionFilePath) == false) {
-            File.Create(sessionFilePath).Close();
-        }
-
-        Session session = new Session(guildID, channelID);
-        session.Load(sessionFilePath);
-
-        session.Save();
-
-        var userFilePath = Path.Combine(AppData.botDataPath, "users", $"{userID}", "user.json");
-
-        if(File.Exists(userFilePath) == false) {
-            File.Create(userFilePath).Close();
-        }
-
-        User user = new User(userID);
-        user.Load(userFilePath);
-
-        user.Save();
-
     }
 
     public void SaveLog(ulong guildID, ulong channelID, ulong authorID, string LogMessage) {

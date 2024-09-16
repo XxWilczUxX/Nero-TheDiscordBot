@@ -22,7 +22,7 @@ public static class DefaultNames
 
     public static string[] Roles { get; } = 
     { 
-        "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl" 
+        "Unassigned", "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl" 
     };
 
     public static string[] Abilities { get; } = 

@@ -81,15 +81,16 @@ public class Character
     public List<Skill> Skills { get; private set; } = new List<Skill>();
     public Role Role { get; private set; } = new Role();
     public int Experience { get; private set; } = 0;
+
+    private byte StatPoints { get; set; } = 0;
+    private byte SkillPoints { get; set; } = 0;
     
-    public Character(string name, byte role_id = 255)
+    public Character(string name, byte role_id = 0)
     {
         Name = name;
 
-        if(role_id != 255)
-        {
-            Role = new Role(role_id);
-        }
+        Role = new Role(role_id);
+        
 
         foreach(string stat_name in DefaultNames.Stats)
         {
@@ -111,6 +112,12 @@ public class Character
                 }
             }
         }
+    }
+
+
+    public byte[] getPoints()
+    {
+        return [StatPoints, SkillPoints];
     }
     
 

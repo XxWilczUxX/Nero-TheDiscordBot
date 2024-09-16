@@ -138,7 +138,7 @@ public class CommandBuilders
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("role")
                 .WithDescription("choose the character role.")
-                .AddChoice(DefaultNames.Roles[0], 0)
+                // .AddChoice(DefaultNames.Roles[0], 0) - a unassigned role, not allowed to be chosen
                 .AddChoice(DefaultNames.Roles[1], 1)
                 .AddChoice(DefaultNames.Roles[2], 2)
                 .AddChoice(DefaultNames.Roles[3], 3)
@@ -148,6 +148,7 @@ public class CommandBuilders
                 .AddChoice(DefaultNames.Roles[7], 7)
                 .AddChoice(DefaultNames.Roles[8], 8)
                 .AddChoice(DefaultNames.Roles[9], 9)
+                .AddChoice(DefaultNames.Roles[10], 10)
                 .WithType(ApplicationCommandOptionType.Integer)
                 .WithRequired(true)
             )

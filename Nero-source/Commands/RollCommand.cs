@@ -1,4 +1,3 @@
-using Discord;
 using Discord.WebSocket;
 
 namespace Nero;
@@ -34,9 +33,7 @@ public class RollCommand
             }
         }
 
-        var embeds = new Embeds();
-
-        var embed = embeds.Rolls(max, rolls);
+        var embed = Embeds.Rolls(max, rolls);
 
         await command.RespondAsync(embed: embed.Build());
 

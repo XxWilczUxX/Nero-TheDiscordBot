@@ -31,11 +31,10 @@ public class DebugCommands
                 }
                 break;
             case "shutdown":
-                var info = new Data.Info();
-                if(command.User.Id == info.HeadAdminID) {
+                var secret = new Data.Secret();
+                if(command.User.Id == secret.HeadAdminID) {
 
-                    var embeds = new Embeds();
-                    await command.RespondAsync("",embed: embeds.Info("Shutdown", "The bot has been shut down.").Build())
+                    await command.RespondAsync("",embed: Embeds.Info("Shutdown", "The bot has been shut down.").Build())
                         .ContinueWith(async _ =>{
                             await _client.LogoutAsync();
                             Console.WriteLine("Logged out...");
@@ -50,8 +49,7 @@ public class DebugCommands
                         });
 
                 } else {
-                    var embeds = new Embeds();
-                    await command.RespondAsync("",embed: embeds.Error("You don't have permissions to run this command.").Build());
+                    await command.RespondAsync("",embed: Embeds.Error("You don't have permissions to run this command.").Build());
                 }
                 break;
         }
@@ -101,8 +99,7 @@ public class DebugCommands
                 await delCom.DeleteAsync();
             }
         }
-        Embeds embeds = new Embeds();
-        EmbedBuilder embed = embeds.DebugExecuted();
+        EmbedBuilder embed = Embeds.DebugExecuted();
         await command.RespondAsync(embed: embed.Build());
     }
 
@@ -117,8 +114,7 @@ public class DebugCommands
                 await delCom.DeleteAsync();
             }
         }
-        Embeds embeds = new Embeds();
-        var embed = embeds.DebugExecuted();
+        var embed = Embeds.DebugExecuted();
         await command.RespondAsync(embed: embed.Build());
     }
 }

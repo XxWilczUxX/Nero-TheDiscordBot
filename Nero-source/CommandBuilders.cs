@@ -1,4 +1,5 @@
 using Discord;
+using Nero.Data.GameData;
 
 namespace Nero;
 public class CommandBuilders
@@ -120,4 +121,53 @@ public class CommandBuilders
                 )
             )
         );
+
+    public readonly SlashCommandBuilder Character = new SlashCommandBuilder()
+        .WithName("character")
+        .WithDescription("Command family for creation and management of characters")
+        .AddOption(new SlashCommandOptionBuilder()
+            .WithName("create")
+            .WithDescription("Creates a new character")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("name")
+                .WithDescription("choose the character name.")
+                .WithType(ApplicationCommandOptionType.String)
+                .WithRequired(true)
+            )
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("role")
+                .WithDescription("choose the character role.")
+                // .AddChoice(DefaultNames.Roles[0], 0) - a unassigned role, not allowed to be chosen
+                .AddChoice(DefaultNames.Roles[1], 1)
+                .AddChoice(DefaultNames.Roles[2], 2)
+                .AddChoice(DefaultNames.Roles[3], 3)
+                .AddChoice(DefaultNames.Roles[4], 4)
+                .AddChoice(DefaultNames.Roles[5], 5)
+                .AddChoice(DefaultNames.Roles[6], 6)
+                .AddChoice(DefaultNames.Roles[7], 7)
+                .AddChoice(DefaultNames.Roles[8], 8)
+                .AddChoice(DefaultNames.Roles[9], 9)
+                .AddChoice(DefaultNames.Roles[10], 10)
+                .WithType(ApplicationCommandOptionType.Integer)
+                .WithRequired(true)
+            )
+        )
+        .AddOption(new SlashCommandOptionBuilder()
+            .WithName("delete")
+            .WithDescription("Deletes a character")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("name")
+                .WithDescription("choose the character name.")
+                .WithType(ApplicationCommandOptionType.String)
+                .WithRequired(true)
+            )
+        )
+        .AddOption(new SlashCommandOptionBuilder()
+            .WithName("list")
+            .WithDescription("Lists all characters")
+            .WithType(ApplicationCommandOptionType.SubCommand)
+        );
+        
 }

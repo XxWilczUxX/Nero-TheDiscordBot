@@ -1,6 +1,8 @@
 using Discord;
 using Discord.WebSocket;
 using Nero.Data;
+using Nero.Data.SessionData;
+using Nero.Data.UserData;
 
 namespace Nero;
 
@@ -18,8 +20,7 @@ public class SessionCommand
                 await LogCommands.LogHandler(command, command.Data.Options.First().Options.First().Name);
                 return;
             default:
-                var embeds = new Embeds();
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }
@@ -30,39 +31,42 @@ public class SessionCommand
 
         var socketChannel = command.Channel as ITextChannel;
 
-        var embeds = new Embeds();
-
         if (socketChannel != null)
         {
 
             User user = new User(userId);
             user.Load();
 
-            if(!user.CanAddSession()) {
-                await command.RespondAsync(embed: embeds.Error("You have too many sessions open.").Build());
-                return;
-            }
-
-            var newSession = await socketChannel.CreateThreadAsync(
+            var sessionChannel = await socketChannel.CreateThreadAsync(
                 name: command.Data.Options.First().Options.First().Value.ToString(),
                 autoArchiveDuration: ThreadArchiveDuration.OneWeek,
                 invitable: true,
                 type: ThreadType.PrivateThread
             );
 
-            DataController dataController = new DataController();
+            try
+            {
+                Session session = new Session(sessionChannel.GuildId, sessionChannel.Id);
+                session.Save();
 
-            dataController.SaveSession(command.GuildId?? 0, newSession.Id, userId);
+                user.AddSession(session.ChannelID);
+                user.Save();
+            }
+            catch (Exception ex)
+            {
+                await command.RespondAsync(embed: Embeds.Error(ex.Message).Build());
+                return;
+            }
 
-            string channelMention = $"<#{newSession.Id}>";
+            string channelMention = $"<#{sessionChannel.Id}>";
 
             await command.RespondAsync($"Session created: {channelMention}");
 
-            await newSession.SendMessageAsync($"Session created by: {command.User.Mention}!");
+            await sessionChannel.SendMessageAsync($"Session created by: {command.User.Mention}!");
         }
         else
         {
-            await command.RespondAsync(embed: embeds.Error("Channel Error.").Build());
+            await command.RespondAsync(embed: Embeds.Error("Channel Error.").Build());
         }
     }
 

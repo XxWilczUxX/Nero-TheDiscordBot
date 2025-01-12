@@ -1,18 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Newtonsoft.Json;
+using System.Reflection;
+using Nero.Data;
 
 namespace Nero;
-
-public class Names
-{
-    public readonly string[] stats = { "Inteligence", "Reflex", "Agility", "Technology", "Charisma", "Will", "Luck", "Movement", "Body", "Empathy" };
-    public readonly string[] abilityGroups = { "Long Range Weapons", "Body", "Education", "Control", "Observation", "Technology", "Social", "Meele", "Performances" };
-    public readonly string[] skills = { "Heavy Weapons", "Long Weapons", "Short Weapons", "Archery", "Continous Fire", "Athletics", "Rubber Man", "Torture/Narcotic Tolerancy", "Stealth", "Dance", "Endurance", "Bureaucracy", "Deduction", "Language", "Composing", "Criminology", "Cryptography", "Accounting", "Science", "Animal Care", "Library Searching", "Making Deals", "Art of Survival", "Tactics", "Local Knowlege", "Education", "Riding", "Piloting", "Car Driving", "Sailing", "Lip Reading", "Concentration", "Perception", "Tracking", "Hiding/Finding an Item", "Cyber Engineering", "Electronics and Security", "Falsification", "Photography", "Pickpocketing", "Art", "Explosives", "Weapon Repair", "Land Vehicle Repair", "Water Vehicle Repair", "Air Vehicle Repair", "Lockpicking", "First Aid", "Basic Repairing", "Paramedics", "Attractiveness", "Trading", "Conversation", "Fashion", "Emotional Inteligence", "Persuasion", "Bribery", "Interrogation", "Semi-Literate Knowlege", "Fighting", "Meele Weapons", "Martial Arts", "Dodgeing", "Acting", "Playing an Instrument" };
-    public readonly string[] subskills = { "Street Slang", "Your Area" };
-    public readonly string[,] roles = {{ "Solo", "Netrunner", "Techie", "Media", "Cop", "Nomad", "Fixer", "Corporate", "Medtech", "Rockerboy / Rockergirl" }, { "Combat Sense", "Interface", "Jurry Rig", "Credibility", "Family", "Authority", "Connections", "Resources", "Medical Tech", "Charismatic Leadership" }};
-}
 
 class Program
 {
@@ -21,17 +13,10 @@ class Program
 
     private DiscordSocketClient _client = new DiscordSocketClient();
     private CommandService _commands = new CommandService();
-    private Data.Info info = new Data.Info();
+    private Secret info = new Secret();
     public async Task MainAsync(string[] args)
     {
-
-        if(info.Token == string.Empty)
-        {
-            Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
-        }
-
-        Data.DataController dataController = new Data.DataController();
-        dataController.CreateLocalFiles();
+        DataController.CreateLocalFiles();
 
         _client = new DiscordSocketClient();
         _commands = new CommandService();
@@ -66,19 +51,39 @@ class Program
 
         var commandBuilders = new CommandBuilders();
 
-        var guildCommand = commandBuilders.Session;
+        var slashCommandBuilders = GetSlashCommandBuilders(commandBuilders);
 
-        try
+        foreach(var builder in slashCommandBuilders)
         {
-            await guild.CreateApplicationCommandAsync(guildCommand.Build());
-        }
-        catch (Exception ex)
-        {
-
-            Console.WriteLine(ex.Message);
+            try
+            {
+                Console.WriteLine("Registering command: " + builder.Name);
+                await guild.CreateApplicationCommandAsync(builder.Build());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         _client.SlashCommandExecuted += SlashCommandHandler;
+    }
+
+    public List<SlashCommandBuilder> GetSlashCommandBuilders(CommandBuilders commandBuilders) // TBH i have no idea how this works, but it does.
+    {
+        var properties = commandBuilders.GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(prop => prop.PropertyType == typeof(SlashCommandBuilder))
+            .Select(prop => prop.GetValue(commandBuilders) as SlashCommandBuilder);
+
+        var fields = commandBuilders.GetType()
+            .GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(field => field.FieldType == typeof(SlashCommandBuilder))
+            .Select(field => field.GetValue(commandBuilders) as SlashCommandBuilder);
+
+        return properties.Concat(fields)
+            .Where(builder => builder != null)
+            .ToList()!;
     }
 
     private async Task SlashCommandHandler(SocketSlashCommand command)
@@ -102,10 +107,14 @@ class Program
 
                 await sessionCommandHandler(command);
                 return;
-            default:
-                var embeds = new Embeds();
+            case "character":
+                var characterCommandHandler = new CharacterCommand().CommandHandler;
 
-                await command.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await characterCommandHandler(command);
+                return;
+            default:
+
+                await command.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }
@@ -123,8 +132,7 @@ class Program
                 await logCommands.LogHandler(component, idParts[1], int.Parse(idParts[2]));
                 return;
             default:
-                var embeds = new Embeds();
-                await component.RespondAsync(embed: embeds.Error("Not implemented yet.").Build());
+                await component.RespondAsync(embed: Embeds.Error("Not implemented yet.").Build());
                 return;
         }
     }

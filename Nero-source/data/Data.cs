@@ -27,6 +27,47 @@ public static class DataHelper
     }
 }
 
+public static class DataController
+{
+
+    private static void EnsurePathExists(string path)
+    {
+        if (Path.Exists(path) == false)
+        {
+            Directory.CreateDirectory(path);
+        }
+    }
+    private static void EnsureFileExists(string path)
+    {
+        if (File.Exists(path) == false)
+        {
+            File.Create(path).Close();
+        }
+    }
+
+    public static void CreateLocalJsonFiles()
+    {
+
+        EnsurePathExists(AppData.botDataPath);
+
+        var files = new List<string> {
+            Path.Combine(AppData.botDataPath, "settings.json"),
+            Path.Combine(AppData.botDataPath, "token.json"),
+        };
+
+        foreach (var file in files)
+        {
+            EnsureFileExists(file);
+        }
+    }
+
+}
+
+public class Database
+{
+
+}
+
 public class Secret
 {
     public string Token { get; private set; } = string.Empty;
@@ -72,30 +113,4 @@ public class Settings
             MaxCharactersPerUser = settings.MaxCharactersPerUser;
         }
     }
-}
-
-public static class DataController
-{
-    private static void EnsureFileExists(string path)
-    {
-        if (File.Exists(path) == false)
-        {
-            File.Create(path).Close();
-        }
-    }
-
-    public static void CreateLocalJsonFiles()
-    {
-
-        var files = new List<string> {
-            Path.Combine(AppData.botDataPath, "settings.json"),
-            Path.Combine(AppData.botDataPath, "token.json"),
-        };
-
-        foreach (var file in files)
-        {
-            EnsureFileExists(file);
-        }
-    }
-
 }

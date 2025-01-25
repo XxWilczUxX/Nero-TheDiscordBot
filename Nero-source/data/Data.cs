@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Nero.Data;
 
-public class AppData
+public static class AppData
 {
     private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     public static readonly string botDataPath = Path.Combine(appDataPath, "CPBot");
@@ -74,7 +74,7 @@ public class Settings
     }
 }
 
-public class DataController
+public static class DataController
 {
     private static void EnsureFileExists(string path)
     {

@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 
 namespace Nero.Data;
@@ -65,6 +66,25 @@ public static class DataController
 
 public class Database
 {
+    private readonly string _connectionString;
+
+    public Database(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    public SqliteConnection GetConnection()
+    {
+        var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        return connection;
+    }
+
+    public void Initialize()
+    {
+        using var connection = GetConnection();
+
+    }
 
 }
 

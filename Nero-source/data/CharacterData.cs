@@ -1,5 +1,4 @@
 using Nero.Data.GameData;
-using Newtonsoft.Json;
 
 
 namespace Nero.Data.CharacterData;
@@ -39,7 +38,7 @@ public class Skill
 
     public void AddSubskill(string subskill_name)
     {
-        if(Subskills == null)
+        if (Subskills == null)
         {
             Subskills = new List<Skill>();
         }
@@ -84,30 +83,30 @@ public class Character
 
     private byte StatPoints { get; set; } = 0;
     private byte SkillPoints { get; set; } = 0;
-    
+
     public Character(string name, byte role_id = 0)
     {
         Name = name;
 
         Role = new Role(role_id);
-        
 
-        foreach(string stat_name in DefaultNames.Stats)
+
+        foreach (string stat_name in DefaultNames.Stats)
         {
             Stats.Add(new Stat(stat_name));
         }
-        for(byte i = 0; i < DefaultNames.Skills.GetLength(1)*2; i++)
+        for (byte i = 0; i < DefaultNames.Skills.GetLength(1) * 2; i++)
         {
-            if(i < DefaultNames.Skills.GetLength(1))
+            if (i < DefaultNames.Skills.GetLength(1))
             {
                 Skills.Add(new Skill(DefaultNames.Skills[0, i]));
                 //Console.WriteLine($"Added skill: {Skills.Last().Name}");
             }
             else
             {
-                if(DefaultNames.Skills[1, i-DefaultNames.Skills.GetLength(1)] != "")
+                if (DefaultNames.Skills[1, i - DefaultNames.Skills.GetLength(1)] != "")
                 {
-                    Skills.ElementAt(i-DefaultNames.Skills.GetLength(1)).AddSubskill(DefaultNames.Skills[1, i-DefaultNames.Skills.GetLength(1)]); 
+                    Skills.ElementAt(i - DefaultNames.Skills.GetLength(1)).AddSubskill(DefaultNames.Skills[1, i - DefaultNames.Skills.GetLength(1)]);
                     //Console.WriteLine($"Added subskill: {Skills.ElementAt(i-DefaultNames.Skills.GetLength(1)).Subskills?.Last().Name}");   
                 }
             }
@@ -119,13 +118,13 @@ public class Character
     {
         return [StatPoints, SkillPoints];
     }
-    
+
 
     private byte getStatIndex(string stat_name)
     {
-        for(byte i = 0; i < Stats.Count; i++)
+        for (byte i = 0; i < Stats.Count; i++)
         {
-            if(Stats.ElementAt(i).Name == stat_name)
+            if (Stats.ElementAt(i).Name == stat_name)
             {
                 return i;
             }
@@ -135,10 +134,10 @@ public class Character
     }
     private byte getSkillIndex(string skill_name) // returns skill_index
     {
-        
-        for(byte i = 0; i < Skills.Count; i++)
+
+        for (byte i = 0; i < Skills.Count; i++)
         {
-            if(Skills.ElementAt(i).Name == skill_name)
+            if (Skills.ElementAt(i).Name == skill_name)
             {
                 return i;
             }
@@ -149,16 +148,16 @@ public class Character
 
     private byte[] getSubskillIndex(string subskill_name) // returns [skill_index, subskill_index]
     {
-        for(byte skill_index = 0; skill_index < Skills.Count; skill_index++)
+        for (byte skill_index = 0; skill_index < Skills.Count; skill_index++)
         {
             List<Skill>? subskills = Skills.ElementAt(skill_index).Subskills;
-            if(subskills != null)
+            if (subskills != null)
             {
-                for(byte subskill_index = 0; subskill_index < subskills.Count; subskill_index++)
+                for (byte subskill_index = 0; subskill_index < subskills.Count; subskill_index++)
                 {
-                    if(subskills.ElementAt(subskill_index).Name == subskill_name)
+                    if (subskills.ElementAt(subskill_index).Name == subskill_name)
                     {
-                        return [ skill_index, subskill_index ];
+                        return [skill_index, subskill_index];
                     }
                 }
             }
@@ -207,24 +206,24 @@ public class Character
     {
         byte[] indexes = getSubskillIndex(subskill_name);
 
-        if(Skills[indexes[0]].Subskills != null)
+        if (Skills[indexes[0]].Subskills != null)
         {
             Skills[indexes[0]].Subskills?.ElementAt(indexes[1]).SetLevel(level);
         }
 
-        
+
     }
 
     public void SetSubskillLevel(byte skill_index, byte subskill_index, byte level)
     {
 
-        if(Skills[skill_index].Subskills != null)
+        if (Skills[skill_index].Subskills != null)
         {
             Skills[skill_index].Subskills?.ElementAt(subskill_index).SetLevel(level);
         }
 
-        
+
     }
 
-    
+
 }

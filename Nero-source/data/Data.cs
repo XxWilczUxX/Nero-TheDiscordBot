@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
-using Nero.Data.SessionData;
 
 namespace Nero.Data;
 
-public class AppData {
-    private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);   
+public class AppData
+{
+    private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     public static readonly string botDataPath = Path.Combine(appDataPath, "CPBot");
 
     public static readonly Settings settings = new Settings();
@@ -35,9 +35,9 @@ public class Secret
 
     public Secret()
     {
-        DataController.CreateLocalFiles();
+        DataController.CreateLocalJsonFiles();
 
-        var filePath = Path.Combine(AppData.botDataPath, "settings", "token.json");
+        var filePath = Path.Combine(AppData.botDataPath, "token.json");
         var deserializedInfo = DataHelper.LoadData<DeserializedSecret>(filePath);
         if (deserializedInfo != null)
         {
@@ -62,9 +62,9 @@ public class Settings
 
     public Settings()
     {
-        DataController.CreateLocalFiles();
+        DataController.CreateLocalJsonFiles();
 
-        var filePath = Path.Combine(AppData.botDataPath, "settings", "settings.json");
+        var filePath = Path.Combine(AppData.botDataPath, "settings.json");
         var settings = DataHelper.LoadData<Settings>(filePath);
         if (settings != null)
         {
@@ -74,53 +74,26 @@ public class Settings
     }
 }
 
-public class DataController { 
-
-    private static void EnsureDirectoryExists(string path) {
-        if(Directory.Exists(path) == false) {
-            Directory.CreateDirectory(path);
-        }
-    }
-    private static void EnsureFileExists(string path) {
-        if(File.Exists(path) == false) {
+public class DataController
+{
+    private static void EnsureFileExists(string path)
+    {
+        if (File.Exists(path) == false)
+        {
             File.Create(path).Close();
         }
     }
 
-    public static void CreateLocalFiles(ulong guildID = 0, ulong channelID = 0, ulong userID = 0) {
-        var paths = new List<string> {
-            AppData.botDataPath,
-            Path.Combine(AppData.botDataPath, "settings"),
-            Path.Combine(AppData.botDataPath, "guilds"),
-            Path.Combine(AppData.botDataPath, "users"),
-        };
+    public static void CreateLocalJsonFiles()
+    {
 
         var files = new List<string> {
-            Path.Combine(paths.ElementAt(1), "settings.json"),
-            Path.Combine(paths.ElementAt(1), "token.json"),
+            Path.Combine(AppData.botDataPath, "settings.json"),
+            Path.Combine(AppData.botDataPath, "token.json"),
         };
 
-        if (guildID != 0) {
-            var guildPath = Path.Combine(paths.ElementAt(2), guildID.ToString(), "sessions");
-            paths.Add(guildPath);
-
-            if (channelID != 0) {
-                files.Add(Path.Combine(guildPath, $"{channelID}.json"));
-            }
-        }
-
-        if (userID != 0) {
-            var userPath = Path.Combine(paths.ElementAt(3), $"{userID}");
-            paths.Add(userPath);
-            paths.Add(Path.Combine(userPath, "characters"));
-            files.Add(Path.Combine(userPath, $"user.json"));
-        }
-
-        foreach (var path in paths) {
-            EnsureDirectoryExists(path);
-        }
-
-        foreach (var file in files) {
+        foreach (var file in files)
+        {
             EnsureFileExists(file);
         }
     }

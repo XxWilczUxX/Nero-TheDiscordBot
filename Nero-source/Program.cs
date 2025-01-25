@@ -16,7 +16,7 @@ class Program
     private Secret info = new Secret();
     public async Task MainAsync(string[] args)
     {
-        DataController.CreateLocalFiles();
+        DataController.CreateLocalJsonFiles();
 
         _client = new DiscordSocketClient();
         _commands = new CommandService();
@@ -28,7 +28,7 @@ class Program
 
         string Token = info.Token;
 
-        if(Token == string.Empty)
+        if (Token == string.Empty)
         {
             Console.WriteLine("\nNo /safe/safe.json config file or token was unset.\n");
         }
@@ -53,7 +53,7 @@ class Program
 
         var slashCommandBuilders = GetSlashCommandBuilders(commandBuilders);
 
-        foreach(var builder in slashCommandBuilders)
+        foreach (var builder in slashCommandBuilders)
         {
             try
             {
@@ -90,7 +90,7 @@ class Program
     {
         Console.WriteLine($"Executed: {command.Data.Name}, ID: {command.Data.Id} \n");
 
-        switch(command.CommandName)
+        switch (command.CommandName)
         {
             case "debug":
                 var debug = new DebugCommands();
@@ -124,7 +124,7 @@ class Program
 
         var idParts = component.Data.CustomId.Split('-');
 
-        switch(idParts[0])
+        switch (idParts[0])
         {
             case "log":
                 var logCommands = new LogSubCommand();

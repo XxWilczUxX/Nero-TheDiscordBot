@@ -8,6 +8,8 @@ public static class AppData
     private static string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
     public static readonly string botDataPath = Path.Combine(appDataPath, "CPBot");
 
+    public static readonly string databasePath = Path.Combine(botDataPath, "db.sqlite");
+
     public static readonly Settings settings = new Settings();
 }
 
